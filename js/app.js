@@ -2,6 +2,7 @@
 (() => {
   const SCREENS = ['profile', 'feedback', 'package'];
   const DEFAULT = 'profile';
+  const APP_NAME = 'VestaFuture';
 
   const title = document.getElementById('screen-title');
   const tabs = document.querySelectorAll('.tabbar a');
@@ -15,7 +16,7 @@
       el.hidden = name !== current;
       if (name === current) {
         title.textContent = el.dataset.title;
-        document.title = `${el.dataset.title} · Farm Visits`;
+        document.title = APP_NAME;
       }
     }
     for (const tab of tabs) {
@@ -26,6 +27,14 @@
     // Re-read feedback and farm answers each time, since either may have changed.
     if (current === 'package') Analysis.onShow();
   }
+
+  // Two-sentence welcome on the first screen until she taps "Got it".
+  const welcome = document.getElementById('welcome');
+  welcome.hidden = Store.load('welcome.dismissed') === true;
+  document.getElementById('welcome-ok').addEventListener('click', () => {
+    Store.save('welcome.dismissed', true);
+    welcome.hidden = true;
+  });
 
   Profile.init();
   Feedback.init();

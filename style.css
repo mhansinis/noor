@@ -11,9 +11,13 @@
   --yes: #2e7d32;
   --effort: #a35f00;
   --no: #6b625b;
+  --yes-text: #2e7d32;     /* green used as text, 4.5:1 or more on cards */
+  --effort-text: #a35f00;  /* amber used as text */
+  --control: #8c8178;      /* outlines of buttons and fields, 3:1 or more */
   --danger: #b3261e;
   --focus: #1565c0;
   --tabbar-h: 68px;
+  --header-space: 96px; /* sticky header (app name + title) plus a small gap */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,6 +30,9 @@
     --brand: #2b1f16;
     --primary: #f3ece5;
     --primary-text: #17130f;
+    --yes-text: #6fbf73;
+    --effort-text: #e0a040;
+    --control: #85786d;
     --danger: #ef6b62;
     --focus: #64b5f6;
   }
@@ -117,7 +124,7 @@ main {
 .choice button {
   min-height: 52px;
   border-radius: 10px;
-  border: 2px solid var(--line);
+  border: 2px solid var(--control);
   background: transparent;
   color: var(--text);
   font: inherit;
@@ -143,7 +150,7 @@ main {
   min-height: 56px;
   font: inherit;
   padding: 0 14px;
-  border: 2px solid var(--line);
+  border: 2px solid var(--control);
   border-radius: 10px;
   background: var(--card);
   color: var(--text);
@@ -165,7 +172,7 @@ main {
   margin-top: 32px;
   background: transparent;
   color: var(--muted);
-  border: 2px dashed var(--line);
+  border: 2px dashed var(--control);
 }
 
 /* Feedback screen */
@@ -175,7 +182,7 @@ main {
 .paste-form textarea {
   font: inherit;
   padding: 12px 14px;
-  border: 2px solid var(--line);
+  border: 2px solid var(--control);
   border-radius: 10px;
   background: var(--card);
   color: var(--text);
@@ -209,7 +216,7 @@ main {
   color: var(--muted);
 }
 .tag-example { border-style: dashed; }
-.tag-spoken { border-color: var(--effort); color: var(--effort); }
+.tag-spoken { border-color: var(--effort-text); color: var(--effort-text); }
 
 /* Analysis screen */
 .note {
@@ -256,7 +263,7 @@ main {
 .pkg-evidence, .pkg-test, .pkg-also { margin: 0 0 10px; font-size: 0.95rem; }
 .pkg-test { font-weight: 600; }
 .pkg-also { color: var(--muted); }
-.pkg-accepted { margin: 0 0 10px; font-weight: 700; color: var(--yes); }
+.pkg-accepted { margin: 0 0 10px; font-weight: 700; color: var(--yes-text); }
 .pkg-missing { margin: 0; padding-left: 1.2em; }
 .pkg-missing li { margin-bottom: 10px; }
 .pkg-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
@@ -287,7 +294,6 @@ main {
 .theme-small .theme-count { font-style: italic; }
 .theme-reviews { margin: 0; padding: 0 14px 12px 32px; }
 .theme-reviews li { margin-bottom: 6px; overflow-wrap: anywhere; }
-#an-unreadable .theme-reviews { padding: 8px 0 0 18px; }
 
 .placeholder {
   margin-top: 24px;
@@ -340,3 +346,175 @@ main {
 .pkg-cost { margin: -6px 0 12px; font-weight: 700; color: var(--effort); }
 .pkg-cannot { margin: 6px 0 0; color: var(--muted); }
 #an-package > .pkg-also { margin-top: 14px; }
+
+/* Welcome banner */
+.welcome {
+  margin: 4px 0 16px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--card);
+  border: 2px solid var(--yes);
+}
+.welcome p { margin: 0 0 12px; }
+.welcome .btn { min-height: 48px; }
+
+/* Package screen additions */
+.pkg-notice { scroll-margin-top: var(--header-space); }
+.btn-undo { min-height: 44px; padding: 0 16px; margin-left: 4px; }
+.pkg-which-hint { margin: -4px 0 0; font-size: 0.9rem; color: var(--muted); font-weight: 400 !important; }
+.pkg-subhead { margin: 14px 0 6px; font-weight: 700; }
+.pkg-next { margin: 12px 0 0; font-weight: 600; }
+.inline-tag { margin-left: 6px; font-size: 0.75rem; padding: 0 8px; white-space: nowrap; }
+#fb-unreadable { scroll-margin-top: var(--header-space); scroll-margin-bottom: calc(var(--tabbar-h) + 16px); }
+.pkg-which { scroll-margin-bottom: calc(var(--tabbar-h) + 16px); }
+.pkg-actions[hidden] { display: none; }
+
+/* Farm screen tip */
+.tip {
+  margin: -4px 0 12px;
+  padding: 10px 12px;
+  border-left: 4px solid var(--effort);
+  background: var(--card);
+  border-radius: 0 10px 10px 0;
+  font-size: 0.95rem;
+}
+.tip-done { border-left-color: var(--yes); }
+
+/* Questions about unanswered items */
+.pkg-ask { margin-top: 10px; display: grid; gap: 12px; }
+.pkg-ask-lead { margin: 0; }
+.pkg-ask-item { padding-top: 10px; border-top: 1px solid var(--line); }
+.pkg-ask-name { margin: 0; font-weight: 700; color: var(--text); }
+.pkg-ask-item .pkg-trace { margin-bottom: 10px; }
+
+/* Instructions, Next buttons, privacy note */
+.instruction {
+  margin: 4px 0 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+a.btn { display: flex; align-items: center; justify-content: center; text-align: center; text-decoration: none; }
+.btn-next { margin-top: 28px; }
+.btn-next + .btn-quiet { margin-top: 16px; }
+.privacy-note { margin: 16px 0 0; font-size: 0.9rem; color: var(--muted); }
+.privacy-status { margin: 8px 0 0; font-size: 0.9rem; font-weight: 600; color: var(--yes-text); }
+.pkg-needs { margin: 6px 0 0; padding-left: 1.2em; }
+.pkg-needs li { margin-bottom: 8px; }
+.btn[hidden] { display: none; }
+
+/* Paste check step */
+.paste-form[hidden] { display: none; }
+.paste-preview { margin-top: 24px; padding: 14px; border: 2px solid var(--yes); border-radius: 14px; background: var(--card); }
+.paste-preview .list-heading { margin-top: 0; }
+.pp-list { margin: 12px 0; padding-left: 1.6em; }
+.pp-item { margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.pp-text { margin: 0; overflow-wrap: anywhere; }
+.pp-item .remove-btn { padding-left: 0; }
+.pp-dropped { margin: 8px 0 16px; }
+.pp-dropped summary { min-height: 48px; display: flex; align-items: center; cursor: pointer; font-weight: 600; color: var(--muted); }
+.pp-dropped-list { list-style: none; margin: 0; padding: 0; }
+.pp-dropped-item { padding: 8px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
+.pp-why { display: inline-block; margin-top: 2px; font-size: 0.85rem; font-style: italic; }
+.pp-add-back { margin-left: 10px; min-height: 40px; border: none; background: none; font: inherit; font-size: 0.9rem; font-weight: 700; color: var(--yes-text); cursor: pointer; }
+.paste-preview .btn-quiet { margin-top: 10px; }
+.paste-preview { scroll-margin-top: var(--header-space); }
+
+/* Too-short group, save summary, Back / Next row */
+.pp-subhead { margin: 18px 0 4px; font-size: 1rem; }
+.pp-short-list { list-style: none; padding-left: 0; }
+.tag-short { border-style: dashed; margin-left: 6px; }
+.fb-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.save-summary { scroll-margin-top: var(--header-space); border-color: var(--yes); }
+.summary-title { margin: 0 0 6px; font-weight: 700; }
+.summary-list { margin: 0; padding-left: 1.2em; }
+.summary-list li { margin-bottom: 4px; }
+.step-nav { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 28px; }
+.step-nav-single { grid-template-columns: 1fr; }
+.step-nav + .btn-quiet { margin-top: 16px; }
+
+/* App name at the top of the first screen */
+.app-name { margin: 0 0 2px; font-size: 0.85rem; font-weight: 400; opacity: 0.85; }
+
+/* ---- Design review fixes ---- */
+
+/* Header stands out from the page in dark mode too */
+.topbar { border-bottom: 1px solid var(--line); }
+
+/* Progress bar in theme colours (the browser default track is bright white) */
+.an-progress progress {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+.an-progress progress::-webkit-progress-bar { background: var(--line); border-radius: 999px; }
+.an-progress progress::-webkit-progress-value { background: var(--yes); border-radius: 999px; }
+.an-progress progress::-moz-progress-bar { background: var(--yes); border-radius: 999px; }
+
+/* Cost reads as information, not a warning */
+.pkg-cost { margin: -6px 0 12px; font-size: 0.95rem; font-weight: 600; color: var(--muted); }
+.pkg-builds { margin: -6px 0 12px; font-size: 0.95rem; color: var(--muted); }
+
+/* "I can do this" fits on one line */
+.pkg-actions .btn { padding: 0 10px; font-size: 1rem; }
+
+/* First screen: one boxed message, the rest as plain text, so the list starts sooner */
+#screen-profile .instruction { padding: 0; border: none; background: none; margin: 0 0 6px; }
+#screen-profile .tip { margin: 0 0 8px; padding: 6px 10px; font-size: 0.9rem; }
+.welcome { margin-bottom: 12px; }
+.welcome p { margin-bottom: 10px; }
+
+/* Saved feedback: show the newest few, the rest on request */
+.fb-more { margin-top: 4px; }
+#fb-heading { scroll-margin-top: var(--header-space); }
+.tag-lang { margin-left: 0; }
+
+/* ---- My farm: folding groups, floating Next, one-line instruction ---- */
+.instruction-short { font-weight: 600; }
+
+details.group { margin-top: 16px; }
+details.group > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 52px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  scroll-margin-top: var(--header-space);
+}
+details.group > summary::-webkit-details-marker { display: none; }
+details.group > summary::after {
+  content: '▾';
+  font-size: 1.1rem;
+  color: var(--muted);
+  transition: transform 0.15s;
+}
+details.group:not([open]) > summary::after { transform: rotate(-90deg); }
+details.group[open] > summary { margin-bottom: 10px; }
+details.group { scroll-margin-top: var(--header-space); }
+.group-name { font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
+.group-count { margin-left: auto; font-size: 0.9rem; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.group-done .group-count { color: var(--yes-text); }
+
+/* Next stays in view above the tab bar; it is last in the screen, so it
+   settles into place at the very end instead of covering anything. */
+.btn-float {
+  position: sticky;
+  bottom: calc(var(--tabbar-h) + 10px + env(safe-area-inset-bottom));
+  z-index: 2;
+  margin-top: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+.instruction-short { font-size: 1rem; margin-bottom: 4px; }
+.group-name { text-transform: none; letter-spacing: 0; font-size: 1.05rem; color: var(--text); }
+.instruction-one-line { font-size: 1rem; }

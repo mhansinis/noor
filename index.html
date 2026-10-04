@@ -4,22 +4,29 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#3b2a1e">
-  <title>Farm Visits</title>
+  <title>VestaFuture</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="topbar">
+    <p class="app-name">VestaFuture</p>
     <h1 id="screen-title">What my farm can do</h1>
   </header>
 
   <main>
     <!-- Screen 1: capability profile -->
     <section id="screen-profile" class="screen" data-title="What my farm can do">
-      <p class="intro">
-        For each item, tap <strong>Yes</strong>, <strong>With effort</strong> or <strong>No</strong>.
-        Your answers are saved on this phone.
-      </p>
+      <div id="welcome" class="welcome" hidden>
+        <p>
+          <strong>This app turns what your guests say into a farm visit package you can really deliver.</strong>
+          There are three steps: My farm (what you have), Feedback (what guests said) and Package (what you could offer).
+        </p>
+        <button id="welcome-ok" type="button" class="btn btn-secondary">Got it</button>
+      </div>
+
+      <p class="instruction instruction-short">Answer what you can and skip the rest.</p>
       <p id="progress" class="progress" aria-live="polite"></p>
+      <p id="usable-tip" class="tip"></p>
       <p id="save-error" class="save-error" hidden>
         Could not save on this phone. Your changes will be lost when you close the page.
       </p>
@@ -32,7 +39,10 @@
         <button type="submit" class="btn btn-primary">Add</button>
       </form>
 
-      <button id="reset-btn" type="button" class="btn btn-quiet">Start again with the examples</button>
+      <button id="reset-btn" type="button" class="btn btn-quiet">Clear all my answers</button>
+
+      <!-- Last in the screen so it can stay at the bottom of the view while she scrolls. -->
+      <a href="#feedback" class="btn btn-primary btn-wide btn-float">Next: add guest feedback</a>
     </section>
 
     <!-- Screen 2: guest feedback -->
@@ -41,6 +51,8 @@
         Could not save on this phone. Your changes will be lost when you close the page.
       </p>
 
+      <p class="instruction instruction-one-line">Add what guests said, then tap <strong>Next</strong>.</p>
+
       <form id="spoken-form" class="add-form add-form-top" autocomplete="off">
         <label for="spoken-input">What did a guest say?</label>
         <input id="spoken-input" type="text" maxlength="300" placeholder="e.g. Wish we could taste it" enterkeyhint="done">
@@ -48,18 +60,53 @@
       </form>
 
       <form id="paste-form" class="paste-form">
-        <label for="paste-input">Or paste written reviews, one per line, in any language</label>
+        <label for="paste-input">Or paste written reviews, in any language</label>
+        <p class="muted small">You can paste a whole page copied from Google, Booking.com or a document. You will check what was found before anything is saved.</p>
         <textarea id="paste-input" rows="6" placeholder="Paste reviews here"></textarea>
-        <p id="paste-count" class="progress" aria-live="polite">0 reviews in the box</p>
-        <button id="paste-save" type="submit" class="btn btn-primary btn-wide" disabled>Save reviews</button>
+        <p id="paste-count" class="progress" aria-live="polite">Nothing pasted yet</p>
+        <button id="paste-save" type="submit" class="btn btn-primary btn-wide" disabled>Check reviews</button>
       </form>
+
+      <!-- Shown after "Check reviews": she confirms before anything is stored. -->
+      <div id="paste-preview" class="paste-preview" hidden>
+        <h2 id="pp-title" class="list-heading">Found reviews</h2>
+        <p class="muted small">Check each one. Remove anything that is not something a guest said, then save.</p>
+        <ol id="pp-list" class="pp-list"></ol>
+        <div id="pp-short" class="pp-short" hidden>
+          <h3 id="pp-short-title" class="pp-subhead">Kept, but too short to use for themes</h3>
+          <p class="muted small">These are saved as real reviews, but they do not say what guests liked or missed, so they are not used to find themes.</p>
+          <ul id="pp-short-list" class="pp-list pp-short-list"></ul>
+        </div>
+        <details id="pp-dropped" class="pp-dropped">
+          <summary id="pp-dropped-title">Left out</summary>
+          <ul id="pp-dropped-list" class="pp-dropped-list"></ul>
+        </details>
+        <button id="pp-save" type="button" class="btn btn-primary btn-wide">Save reviews</button>
+        <button id="pp-cancel" type="button" class="btn btn-quiet">Back to the pasted text</button>
+      </div>
+
+      <p class="privacy-note">
+        To protect guests, phone numbers, email addresses and names in sign-offs (like “– Anna”)
+        are removed before anything is saved. Only what guests said is kept.
+      </p>
+      <p id="fb-privacy-status" class="privacy-status" role="status" hidden></p>
+
+      <div id="fb-save-summary" class="note save-summary" role="status" hidden></div>
+
+      <div id="fb-unreadable" class="note" role="status" hidden></div>
 
       <h2 id="fb-heading" class="list-heading">Saved feedback</h2>
       <p id="fb-empty" class="muted">Nothing saved yet.</p>
       <ul id="fb-list" class="fb-list" aria-labelledby="fb-heading"></ul>
+      <button id="fb-more" type="button" class="btn btn-quiet fb-more" hidden>Show all</button>
 
       <button id="fb-examples" type="button" class="btn btn-quiet">Load example reviews</button>
       <button id="fb-clear-examples" type="button" class="btn btn-quiet" hidden>Remove example reviews</button>
+
+      <div class="step-nav">
+        <a href="#profile" class="btn btn-secondary">Back</a>
+        <a href="#package" class="btn btn-primary">Next: themes and package</a>
+      </div>
     </section>
 
     <!-- Screen 3: themes and package -->
@@ -67,7 +114,7 @@
       <div id="an-start">
         <p class="intro">
           The app reads your guest feedback, groups it into themes, and suggests
-          one tour package your farm can really deliver.
+          up to three package options your farm can really deliver.
         </p>
         <p class="note">
           The first time, it downloads an AI model of about 135 MB. Use Wi-Fi.
@@ -93,9 +140,13 @@
         <h2 class="list-heading">What guests talked about</h2>
         <p class="muted small">Tap a theme to see the reviews.</p>
         <div id="an-themes"></div>
-        <div id="an-unreadable" class="note" hidden></div>
 
         <button id="an-rerun" type="button" class="btn btn-quiet">Read the feedback again</button>
+      </div>
+
+      <!-- Outside the result so it is there while loading and before the first run too. -->
+      <div class="step-nav step-nav-single">
+        <a href="#feedback" class="btn btn-secondary">Back to guest feedback</a>
       </div>
     </section>
   </main>
@@ -109,6 +160,10 @@
   <script src="js/storage.js"></script>
   <script src="js/ai.js"></script>
   <script src="js/profile.js"></script>
+  <script src="js/privacy.js"></script>
+  <script src="js/paste-parser.js"></script>
+  <script src="js/vague.js"></script>
+  <script src="js/language.js"></script>
   <script src="js/example-reviews.js"></script>
   <script src="js/feedback.js"></script>
   <script src="js/themes.js"></script>

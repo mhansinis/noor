@@ -1,0 +1,2968 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#3b2a1e">
+  <title>VestaFuture</title>
+  <style>
+:root {
+  --bg: #f7f3ee;
+  --card: #ffffff;
+  --text: #1f1a16;
+  --muted: #5c5148;
+  --line: #d9cfc4;
+  --brand: #3b2a1e;
+  --brand-text: #ffffff;
+  --primary: #3b2a1e;
+  --primary-text: #ffffff;
+  --yes: #2e7d32;
+  --effort: #a35f00;
+  --no: #6b625b;
+  --yes-text: #2e7d32;     /* green used as text, 4.5:1 or more on cards */
+  --effort-text: #a35f00;  /* amber used as text */
+  --control: #8c8178;      /* outlines of buttons and fields, 3:1 or more */
+  --danger: #b3261e;
+  --focus: #1565c0;
+  --tabbar-h: 68px;
+  --header-space: 96px; /* sticky header (app name + title) plus a small gap */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17130f;
+    --card: #231d18;
+    --text: #f3ece5;
+    --muted: #bfb3a7;
+    --line: #42372e;
+    --brand: #2b1f16;
+    --primary: #f3ece5;
+    --primary-text: #17130f;
+    --yes-text: #6fbf73;
+    --effort-text: #e0a040;
+    --control: #85786d;
+    --danger: #ef6b62;
+    --focus: #64b5f6;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 19px;
+  line-height: 1.45;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--brand);
+  color: var(--brand-text);
+  padding: 14px 16px;
+}
+.topbar h1 { margin: 0; font-size: 1.2rem; font-weight: 700; }
+
+main {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 12px 16px calc(var(--tabbar-h) + 32px + env(safe-area-inset-bottom));
+}
+
+.intro { margin: 4px 0 8px; }
+.progress { margin: 0 0 12px; color: var(--muted); font-weight: 600; }
+.save-error {
+  margin: 0 0 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid var(--danger);
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* Groups and items */
+.group h2 {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin: 24px 0 8px;
+}
+.items { list-style: none; margin: 0; padding: 0; }
+
+.item {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.item-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.item-name { flex: 1; font-weight: 600; font-size: 1.05rem; }
+
+.remove-btn {
+  border: none;
+  background: none;
+  color: var(--danger);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 6px 4px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+/* Yes / With effort / No */
+.choice {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr 1fr;
+  gap: 8px;
+}
+.choice button {
+  min-height: 52px;
+  border-radius: 10px;
+  border: 2px solid var(--control);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 4px 6px;
+  cursor: pointer;
+}
+.choice button[aria-pressed="true"] { color: #fff; }
+.choice button[data-status="yes"][aria-pressed="true"]    { background: var(--yes);    border-color: var(--yes); }
+.choice button[data-status="effort"][aria-pressed="true"] { background: var(--effort); border-color: var(--effort); }
+.choice button[data-status="no"][aria-pressed="true"]     { background: var(--no);     border-color: var(--no); }
+
+/* Add form */
+.add-form {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+.add-form label { grid-column: 1 / -1; font-weight: 600; }
+.add-form input {
+  min-height: 56px;
+  font: inherit;
+  padding: 0 14px;
+  border: 2px solid var(--control);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+  min-width: 0;
+}
+
+.btn {
+  min-height: 56px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-primary { background: var(--primary); color: var(--primary-text); border: 2px solid var(--primary); }
+.btn-quiet {
+  display: block;
+  width: 100%;
+  margin-top: 32px;
+  background: transparent;
+  color: var(--muted);
+  border: 2px dashed var(--control);
+}
+
+/* Feedback screen */
+.add-form-top { margin-top: 8px; }
+.paste-form { margin-top: 28px; display: grid; gap: 8px; }
+.paste-form label { font-weight: 600; }
+.paste-form textarea {
+  font: inherit;
+  padding: 12px 14px;
+  border: 2px solid var(--control);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+  min-height: 180px;
+  resize: vertical;
+  width: 100%;
+}
+.paste-form .progress { margin: 0; }
+.btn-wide { width: 100%; }
+.btn:disabled { opacity: 0.45; cursor: default; }
+
+.list-heading { font-size: 1.1rem; margin: 32px 0 8px; }
+.muted { color: var(--muted); margin: 0; }
+
+.fb-list { list-style: none; margin: 0; padding: 0; }
+.fb-item {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px 4px;
+  margin-bottom: 10px;
+}
+.fb-text { margin: 0; overflow-wrap: anywhere; }
+.fb-foot { display: flex; align-items: center; justify-content: space-between; }
+.tag {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  color: var(--muted);
+}
+.tag-example { border-style: dashed; }
+.tag-spoken { border-color: var(--effort-text); color: var(--effort-text); }
+
+/* Analysis screen */
+.note {
+  margin: 12px 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+.small { font-size: 0.9rem; }
+
+.an-progress { margin: 24px 0; }
+.an-progress p { margin: 0 0 10px; font-weight: 600; }
+.an-progress progress { width: 100%; height: 18px; accent-color: var(--yes); }
+
+.pkg {
+  margin-top: 8px;
+  padding: 16px;
+  background: var(--card);
+  border: 2px solid var(--yes);
+  border-radius: 16px;
+}
+.pkg-none { border-color: var(--line); }
+.pkg-kicker {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.pkg h2 { margin: 4px 0 12px; font-size: 1.25rem; line-height: 1.3; }
+.pkg-notice {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--bg);
+  font-weight: 600;
+}
+.pkg-steps { margin: 0 0 12px; padding-left: 1.4em; }
+.pkg-steps li { margin-bottom: 12px; }
+.pkg-step { margin: 0; font-weight: 600; }
+.pkg-trace { margin: 4px 0 0; font-size: 0.9rem; color: var(--muted); }
+.pkg-evidence, .pkg-test, .pkg-also { margin: 0 0 10px; font-size: 0.95rem; }
+.pkg-test { font-weight: 600; }
+.pkg-also { color: var(--muted); }
+.pkg-accepted { margin: 0 0 10px; font-weight: 700; color: var(--yes-text); }
+.pkg-missing { margin: 0; padding-left: 1.2em; }
+.pkg-missing li { margin-bottom: 10px; }
+.pkg-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.pkg-actions .btn[hidden] { display: none; }
+.pkg-actions:has(.btn[hidden]) { grid-template-columns: 1fr; }
+.pkg-which { display: grid; gap: 10px; margin-top: 12px; }
+.pkg-which p { margin: 0; font-weight: 700; }
+.pkg-which .btn-quiet { margin-top: 0; }
+.btn-secondary { background: transparent; color: var(--text); border: 2px solid var(--text); }
+
+.theme {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  margin-bottom: 10px;
+}
+.theme summary {
+  min-height: 56px;
+  padding: 12px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.theme-label { font-weight: 700; }
+.theme-count { font-size: 0.9rem; color: var(--muted); }
+.theme-small .theme-label { font-weight: 600; color: var(--muted); }
+.theme-small .theme-count { font-style: italic; }
+.theme-reviews { margin: 0; padding: 0 14px 12px 32px; }
+.theme-reviews li { margin-bottom: 6px; overflow-wrap: anywhere; }
+
+.placeholder {
+  margin-top: 24px;
+  padding: 20px;
+  border: 2px dashed var(--line);
+  border-radius: 14px;
+  color: var(--muted);
+}
+
+/* Bottom tab bar, within thumb reach */
+.tabbar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--card);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tabbar a {
+  min-height: var(--tabbar-h);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.tab-num {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+}
+.tabbar a[aria-current="page"] { color: var(--text); }
+.tabbar a[aria-current="page"] .tab-num { background: var(--text); border-color: var(--text); color: var(--card); }
+
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.note-line { margin: 0 0 8px; }
+
+/* Package options */
+.pkg + .pkg { margin-top: 14px; }
+#an-package > .pkg-notice { background: var(--card); border: 1px solid var(--line); }
+.pkg-cost { margin: -6px 0 12px; font-weight: 700; color: var(--effort); }
+.pkg-cannot { margin: 6px 0 0; color: var(--muted); }
+#an-package > .pkg-also { margin-top: 14px; }
+
+/* Welcome banner */
+.welcome {
+  margin: 4px 0 16px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--card);
+  border: 2px solid var(--yes);
+}
+.welcome p { margin: 0 0 12px; }
+.welcome .btn { min-height: 48px; }
+
+/* Package screen additions */
+.pkg-notice { scroll-margin-top: var(--header-space); }
+.btn-undo { min-height: 44px; padding: 0 16px; margin-left: 4px; }
+.pkg-which-hint { margin: -4px 0 0; font-size: 0.9rem; color: var(--muted); font-weight: 400 !important; }
+.pkg-subhead { margin: 14px 0 6px; font-weight: 700; }
+.pkg-next { margin: 12px 0 0; font-weight: 600; }
+.inline-tag { margin-left: 6px; font-size: 0.75rem; padding: 0 8px; white-space: nowrap; }
+#fb-unreadable { scroll-margin-top: var(--header-space); scroll-margin-bottom: calc(var(--tabbar-h) + 16px); }
+.pkg-which { scroll-margin-bottom: calc(var(--tabbar-h) + 16px); }
+.pkg-actions[hidden] { display: none; }
+
+/* Farm screen tip */
+.tip {
+  margin: -4px 0 12px;
+  padding: 10px 12px;
+  border-left: 4px solid var(--effort);
+  background: var(--card);
+  border-radius: 0 10px 10px 0;
+  font-size: 0.95rem;
+}
+.tip-done { border-left-color: var(--yes); }
+
+/* Questions about unanswered items */
+.pkg-ask { margin-top: 10px; display: grid; gap: 12px; }
+.pkg-ask-lead { margin: 0; }
+.pkg-ask-item { padding-top: 10px; border-top: 1px solid var(--line); }
+.pkg-ask-name { margin: 0; font-weight: 700; color: var(--text); }
+.pkg-ask-item .pkg-trace { margin-bottom: 10px; }
+
+/* Instructions, Next buttons, privacy note */
+.instruction {
+  margin: 4px 0 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+a.btn { display: flex; align-items: center; justify-content: center; text-align: center; text-decoration: none; }
+.btn-next { margin-top: 28px; }
+.btn-next + .btn-quiet { margin-top: 16px; }
+.privacy-note { margin: 16px 0 0; font-size: 0.9rem; color: var(--muted); }
+.privacy-status { margin: 8px 0 0; font-size: 0.9rem; font-weight: 600; color: var(--yes-text); }
+.pkg-needs { margin: 6px 0 0; padding-left: 1.2em; }
+.pkg-needs li { margin-bottom: 8px; }
+.btn[hidden] { display: none; }
+
+/* Paste check step */
+.paste-form[hidden] { display: none; }
+.paste-preview { margin-top: 24px; padding: 14px; border: 2px solid var(--yes); border-radius: 14px; background: var(--card); }
+.paste-preview .list-heading { margin-top: 0; }
+.pp-list { margin: 12px 0; padding-left: 1.6em; }
+.pp-item { margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.pp-text { margin: 0; overflow-wrap: anywhere; }
+.pp-item .remove-btn { padding-left: 0; }
+.pp-dropped { margin: 8px 0 16px; }
+.pp-dropped summary { min-height: 48px; display: flex; align-items: center; cursor: pointer; font-weight: 600; color: var(--muted); }
+.pp-dropped-list { list-style: none; margin: 0; padding: 0; }
+.pp-dropped-item { padding: 8px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
+.pp-why { display: inline-block; margin-top: 2px; font-size: 0.85rem; font-style: italic; }
+.pp-add-back { margin-left: 10px; min-height: 40px; border: none; background: none; font: inherit; font-size: 0.9rem; font-weight: 700; color: var(--yes-text); cursor: pointer; }
+.paste-preview .btn-quiet { margin-top: 10px; }
+.paste-preview { scroll-margin-top: var(--header-space); }
+
+/* Too-short group, save summary, Back / Next row */
+.pp-subhead { margin: 18px 0 4px; font-size: 1rem; }
+.pp-short-list { list-style: none; padding-left: 0; }
+.tag-short { border-style: dashed; margin-left: 6px; }
+.fb-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.save-summary { scroll-margin-top: var(--header-space); border-color: var(--yes); }
+.summary-title { margin: 0 0 6px; font-weight: 700; }
+.summary-list { margin: 0; padding-left: 1.2em; }
+.summary-list li { margin-bottom: 4px; }
+.step-nav { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 28px; }
+.step-nav-single { grid-template-columns: 1fr; }
+.step-nav + .btn-quiet { margin-top: 16px; }
+
+/* App name at the top of the first screen */
+.app-name { margin: 0 0 2px; font-size: 0.85rem; font-weight: 400; opacity: 0.85; }
+
+/* ---- Design review fixes ---- */
+
+/* Header stands out from the page in dark mode too */
+.topbar { border-bottom: 1px solid var(--line); }
+
+/* Progress bar in theme colours (the browser default track is bright white) */
+.an-progress progress {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+.an-progress progress::-webkit-progress-bar { background: var(--line); border-radius: 999px; }
+.an-progress progress::-webkit-progress-value { background: var(--yes); border-radius: 999px; }
+.an-progress progress::-moz-progress-bar { background: var(--yes); border-radius: 999px; }
+
+/* Cost reads as information, not a warning */
+.pkg-cost { margin: -6px 0 12px; font-size: 0.95rem; font-weight: 600; color: var(--muted); }
+.pkg-builds { margin: -6px 0 12px; font-size: 0.95rem; color: var(--muted); }
+
+/* "I can do this" fits on one line */
+.pkg-actions .btn { padding: 0 10px; font-size: 1rem; }
+
+/* First screen: one boxed message, the rest as plain text, so the list starts sooner */
+#screen-profile .instruction { padding: 0; border: none; background: none; margin: 0 0 6px; }
+#screen-profile .tip { margin: 0 0 8px; padding: 6px 10px; font-size: 0.9rem; }
+.welcome { margin-bottom: 12px; }
+.welcome p { margin-bottom: 10px; }
+
+/* Saved feedback: show the newest few, the rest on request */
+.fb-more { margin-top: 4px; }
+#fb-heading { scroll-margin-top: var(--header-space); }
+.tag-lang { margin-left: 0; }
+
+/* ---- My farm: folding groups, floating Next, one-line instruction ---- */
+.instruction-short { font-weight: 600; }
+
+details.group { margin-top: 16px; }
+details.group > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 52px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  scroll-margin-top: var(--header-space);
+}
+details.group > summary::-webkit-details-marker { display: none; }
+details.group > summary::after {
+  content: '▾';
+  font-size: 1.1rem;
+  color: var(--muted);
+  transition: transform 0.15s;
+}
+details.group:not([open]) > summary::after { transform: rotate(-90deg); }
+details.group[open] > summary { margin-bottom: 10px; }
+details.group { scroll-margin-top: var(--header-space); }
+.group-name { font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
+.group-count { margin-left: auto; font-size: 0.9rem; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.group-done .group-count { color: var(--yes-text); }
+
+/* Next stays in view above the tab bar; it is last in the screen, so it
+   settles into place at the very end instead of covering anything. */
+.btn-float {
+  position: sticky;
+  bottom: calc(var(--tabbar-h) + 10px + env(safe-area-inset-bottom));
+  z-index: 2;
+  margin-top: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+.instruction-short { font-size: 1rem; margin-bottom: 4px; }
+.group-name { text-transform: none; letter-spacing: 0; font-size: 1.05rem; color: var(--text); }
+.instruction-one-line { font-size: 1rem; }
+
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <p class="app-name">VestaFuture</p>
+    <h1 id="screen-title">What my farm can do</h1>
+  </header>
+
+  <main>
+    <!-- Screen 1: capability profile -->
+    <section id="screen-profile" class="screen" data-title="What my farm can do">
+      <div id="welcome" class="welcome" hidden>
+        <p>
+          <strong>This app turns what your guests say into a farm visit package you can really deliver.</strong>
+          There are three steps: My farm (what you have), Feedback (what guests said) and Package (what you could offer).
+        </p>
+        <button id="welcome-ok" type="button" class="btn btn-secondary">Got it</button>
+      </div>
+
+      <p class="instruction instruction-short">Answer what you can and skip the rest.</p>
+      <p id="progress" class="progress" aria-live="polite"></p>
+      <p id="usable-tip" class="tip"></p>
+      <p id="save-error" class="save-error" hidden>
+        Could not save on this phone. Your changes will be lost when you close the page.
+      </p>
+
+      <div id="cap-list"></div>
+
+      <form id="add-form" class="add-form" autocomplete="off">
+        <label for="add-input">Add something else your farm has or can do</label>
+        <input id="add-input" type="text" maxlength="80" placeholder="e.g. Waterfall walk" enterkeyhint="done">
+        <button type="submit" class="btn btn-primary">Add</button>
+      </form>
+
+      <button id="reset-btn" type="button" class="btn btn-quiet">Clear all my answers</button>
+
+      <!-- Last in the screen so it can stay at the bottom of the view while she scrolls. -->
+      <a href="#feedback" class="btn btn-primary btn-wide btn-float">Next: add guest feedback</a>
+    </section>
+
+    <!-- Screen 2: guest feedback -->
+    <section id="screen-feedback" class="screen" data-title="Guest feedback" hidden>
+      <p id="fb-save-error" class="save-error" hidden>
+        Could not save on this phone. Your changes will be lost when you close the page.
+      </p>
+
+      <p class="instruction instruction-one-line">Add what guests said, then tap <strong>Next</strong>.</p>
+
+      <form id="spoken-form" class="add-form add-form-top" autocomplete="off">
+        <label for="spoken-input">What did a guest say?</label>
+        <input id="spoken-input" type="text" maxlength="300" placeholder="e.g. Wish we could taste it" enterkeyhint="done">
+        <button type="submit" class="btn btn-primary">Add</button>
+      </form>
+
+      <form id="paste-form" class="paste-form">
+        <label for="paste-input">Or paste written reviews, in any language</label>
+        <p class="muted small">You can paste a whole page copied from Google, Booking.com or a document. You will check what was found before anything is saved.</p>
+        <textarea id="paste-input" rows="6" placeholder="Paste reviews here"></textarea>
+        <p id="paste-count" class="progress" aria-live="polite">Nothing pasted yet</p>
+        <button id="paste-save" type="submit" class="btn btn-primary btn-wide" disabled>Check reviews</button>
+      </form>
+
+      <!-- Shown after "Check reviews": she confirms before anything is stored. -->
+      <div id="paste-preview" class="paste-preview" hidden>
+        <h2 id="pp-title" class="list-heading">Found reviews</h2>
+        <p class="muted small">Check each one. Remove anything that is not something a guest said, then save.</p>
+        <ol id="pp-list" class="pp-list"></ol>
+        <div id="pp-short" class="pp-short" hidden>
+          <h3 id="pp-short-title" class="pp-subhead">Kept, but too short to use for themes</h3>
+          <p class="muted small">These are saved as real reviews, but they do not say what guests liked or missed, so they are not used to find themes.</p>
+          <ul id="pp-short-list" class="pp-list pp-short-list"></ul>
+        </div>
+        <details id="pp-dropped" class="pp-dropped">
+          <summary id="pp-dropped-title">Left out</summary>
+          <ul id="pp-dropped-list" class="pp-dropped-list"></ul>
+        </details>
+        <button id="pp-save" type="button" class="btn btn-primary btn-wide">Save reviews</button>
+        <button id="pp-cancel" type="button" class="btn btn-quiet">Back to the pasted text</button>
+      </div>
+
+      <p class="privacy-note">
+        To protect guests, phone numbers, email addresses and names in sign-offs (like “– Anna”)
+        are removed before anything is saved. Only what guests said is kept.
+      </p>
+      <p id="fb-privacy-status" class="privacy-status" role="status" hidden></p>
+
+      <div id="fb-save-summary" class="note save-summary" role="status" hidden></div>
+
+      <div id="fb-unreadable" class="note" role="status" hidden></div>
+
+      <h2 id="fb-heading" class="list-heading">Saved feedback</h2>
+      <p id="fb-empty" class="muted">Nothing saved yet.</p>
+      <ul id="fb-list" class="fb-list" aria-labelledby="fb-heading"></ul>
+      <button id="fb-more" type="button" class="btn btn-quiet fb-more" hidden>Show all</button>
+
+      <button id="fb-examples" type="button" class="btn btn-quiet">Load example reviews</button>
+      <button id="fb-clear-examples" type="button" class="btn btn-quiet" hidden>Remove example reviews</button>
+
+      <div class="step-nav">
+        <a href="#profile" class="btn btn-secondary">Back</a>
+        <a href="#package" class="btn btn-primary">Next: themes and package</a>
+      </div>
+    </section>
+
+    <!-- Screen 3: themes and package -->
+    <section id="screen-package" class="screen" data-title="Themes and package" hidden>
+      <div id="an-start">
+        <p class="intro">
+          The app reads your guest feedback, groups it into themes, and suggests
+          up to three package options your farm can really deliver.
+        </p>
+        <p class="note">
+          The first time, it downloads an AI model of about 135 MB. Use Wi-Fi.
+          After that it works with no internet.
+        </p>
+        <p id="an-offline-note" class="save-error" hidden>
+          This page is not opened from a secure address, so the model cannot be
+          saved and will download again each time.
+        </p>
+        <button id="an-run" type="button" class="btn btn-primary btn-wide">Find themes</button>
+      </div>
+
+      <div id="an-progress" class="an-progress" hidden>
+        <p id="an-progress-text" aria-live="polite"></p>
+        <progress id="an-progress-bar" max="100"></progress>
+      </div>
+
+      <p id="an-error" class="save-error" role="alert" hidden></p>
+
+      <div id="an-result" hidden>
+        <div id="an-package"></div>
+
+        <h2 class="list-heading">What guests talked about</h2>
+        <p class="muted small">Tap a theme to see the reviews.</p>
+        <div id="an-themes"></div>
+
+        <button id="an-rerun" type="button" class="btn btn-quiet">Read the feedback again</button>
+      </div>
+
+      <!-- Outside the result so it is there while loading and before the first run too. -->
+      <div class="step-nav step-nav-single">
+        <a href="#feedback" class="btn btn-secondary">Back to guest feedback</a>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabbar" aria-label="Screens">
+    <a href="#profile" data-screen="profile"><span class="tab-num">1</span>My farm</a>
+    <a href="#feedback" data-screen="feedback"><span class="tab-num">2</span>Feedback</a>
+    <a href="#package" data-screen="package"><span class="tab-num">3</span>Package</a>
+  </nav>
+
+  <script>
+// Thin wrapper over localStorage. Every access is guarded because storage can
+// be unavailable (private tabs, full storage, some in-app browsers).
+const Store = (() => {
+  const PREFIX = 'farmvisits.';
+
+  function load(key) {
+    try {
+      const raw = localStorage.getItem(PREFIX + key);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function save(key, value) {
+    try {
+      localStorage.setItem(PREFIX + key, JSON.stringify(value));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function remove(key) {
+    try {
+      localStorage.removeItem(PREFIX + key);
+    } catch {
+      // nothing to do
+    }
+  }
+
+  return { load, save, remove };
+})();
+
+</script>
+  <script>
+// Sentence embeddings via Transformers.js, run in a Web Worker (embed-worker.js).
+// Only used to measure how similar two pieces of text are. Nothing here
+// generates text.
+const AI = (() => {
+  const MODEL_ID = 'Xenova/paraphrase-multilingual-MiniLM-L12-v2';
+  const BROWSER_CACHE = 'transformers-cache';
+
+  let worker = null;
+  let seq = 0;
+  const pending = new Map();
+  const vectors = new Map(); // text -> embedding, kept for this session
+  let onProgress = () => {};
+
+  function failAll(message) {
+    for (const { reject } of pending.values()) reject(new Error(message));
+    pending.clear();
+    worker = null;
+  }
+
+  function getWorker() {
+    if (worker) return worker;
+    worker = new Worker(URL.createObjectURL(new Blob(["// Runs the sentence embedding model off the main thread so the page stays\n// responsive on a slow phone. Transformers.js stores the model and its WASM\n// runtime in the browser cache after the first download; the service worker\n// (sw.js) caches this library file, so later runs need no network.\nimport { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.0/dist/transformers.min.js';\n\nconst MODEL = 'Xenova/paraphrase-multilingual-MiniLM-L12-v2';\nconst BATCH = 8;\n\nenv.allowLocalModels = false;\n\nlet extractorPromise = null;\n\nfunction getExtractor() {\n  extractorPromise ??= pipeline('feature-extraction', MODEL, {\n    dtype: 'q8', // 118 MB quantized model\n    device: 'wasm',\n    progress_callback: (p) => {\n      if (p.status === 'progress_total') {\n        postMessage({ type: 'download', loaded: p.loaded, total: p.total });\n      }\n    },\n  });\n  return extractorPromise;\n}\n\nself.onmessage = async (e) => {\n  const { id, texts } = e.data;\n  try {\n    const extractor = await getExtractor();\n    postMessage({ type: 'ready' });\n    const vectors = [];\n    for (let i = 0; i < texts.length; i += BATCH) {\n      const out = await extractor(texts.slice(i, i + BATCH), { pooling: 'mean', normalize: true });\n      vectors.push(...out.tolist());\n      postMessage({ type: 'embedded', id, done: Math.min(i + BATCH, texts.length), total: texts.length });\n    }\n    postMessage({ type: 'result', id, vectors });\n  } catch (err) {\n    // Allow a retry after a failed download.\n    extractorPromise = null;\n    postMessage({ type: 'error', id, message: String(err?.message || err) });\n  }\n};\n"], { type: 'text/javascript' })), { type: 'module' });
+    worker.onmessage = (e) => {
+      const m = e.data;
+      if (m.type === 'download' || m.type === 'ready' || m.type === 'embedded') {
+        onProgress(m);
+        return;
+      }
+      const p = pending.get(m.id);
+      if (!p) return;
+      pending.delete(m.id);
+      if (m.type === 'result') p.resolve(m.vectors);
+      else p.reject(new Error(m.message));
+    };
+    worker.onerror = (e) => {
+      e.preventDefault();
+      failAll('The AI model could not start. Open the app through the local server, not as a file.');
+    };
+    return worker;
+  }
+
+  function request(texts) {
+    return new Promise((resolve, reject) => {
+      const id = ++seq;
+      pending.set(id, { resolve, reject });
+      getWorker().postMessage({ id, texts });
+    });
+  }
+
+  // Returns one normalised vector per text, embedding only texts not seen before.
+  async function embed(texts, progress) {
+    const missing = [...new Set(texts.filter((t) => !vectors.has(t)))];
+    if (missing.length) {
+      onProgress = progress || (() => {});
+      const result = await request(missing);
+      missing.forEach((t, i) => vectors.set(t, result[i]));
+    }
+    return texts.map((t) => vectors.get(t));
+  }
+
+  // Vectors are normalised, so the dot product is the cosine similarity.
+  function similarity(a, b) {
+    let s = 0;
+    for (let i = 0; i < a.length; i++) s += a[i] * b[i];
+    return s;
+  }
+
+  // True if the model was already downloaded on this device.
+  async function isModelCached() {
+    try {
+      if (!('caches' in self)) return false;
+      const cache = await caches.open(BROWSER_CACHE);
+      const keys = await cache.keys();
+      return keys.some((r) => r.url.includes(MODEL_ID) && r.url.endsWith('.onnx'));
+    } catch {
+      return false;
+    }
+  }
+
+  return { embed, similarity, isModelCached };
+})();
+
+</script>
+  <script>
+// Screen 1: capability profile.
+// Each item has a status: 'yes', 'effort' (possible with effort), 'no', or null (not answered yet).
+const Profile = (() => {
+  const STORAGE_KEY = 'profile.v1';
+  const GOOD_USABLE = 10; // suggested number of Yes / With effort items
+
+  const GROUPS = [
+    'Coffee and the farm',
+    'Food and drink',
+    'Hosting guests',
+    'Getting here and around',
+    'People and skills',
+    'My additions',
+  ];
+  const CUSTOM_GROUP = 'My additions';
+
+  const SEED = [
+    ['coffee-picking', 'Coffee trees guests can pick from (in season)', 'Coffee and the farm'],
+    ['hand-pulping', 'Pulping and washing cherries by hand', 'Coffee and the farm'],
+    ['drying-yard', 'Drying yard or raised drying beds', 'Coffee and the farm'],
+    ['hand-roaster', 'Hand roaster (pan or drum over fire)', 'Coffee and the farm'],
+    ['grind-brew', 'Grinder and brewing gear for tastings', 'Coffee and the farm'],
+    ['spice-plants', 'Pepper, cinnamon or cardamom growing on the farm', 'Coffee and the farm'],
+    ['farm-walk', 'Walking path through the farm', 'Coffee and the farm'],
+    ['beans-to-sell', 'Roasted coffee to sell to guests', 'Coffee and the farm'],
+
+    ['outdoor-kitchen', 'Outdoor kitchen or cooking area', 'Food and drink'],
+    ['rice-curry', 'Cook a rice and curry lunch for guests', 'Food and drink'],
+    ['cooking-class', 'Let guests cook alongside me', 'Food and drink'],
+    ['veg-meals', 'Vegetarian or vegan meals', 'Food and drink'],
+
+    ['shade-seating', 'Shaded seating for a small group', 'Hosting guests'],
+    ['rain-shelter', 'Covered space if it rains', 'Hosting guests'],
+    ['guest-toilet', 'Clean toilet guests can use', 'Hosting guests'],
+    ['overnight', 'Space for overnight guests', 'Hosting guests'],
+
+    ['transport', 'Transport for guests (tuk-tuk or van)', 'Getting here and around'],
+    ['station-pickup', 'Pick-up from the nearest train station or bus stop', 'Getting here and around'],
+    ['parking', 'Parking for a car or van', 'Getting here and around'],
+
+    ['english', 'Explain things to guests in English', 'People and skills'],
+    ['helper', 'Family member or neighbour to help on visit days', 'People and skills'],
+    ['phone-booking', 'Take bookings by phone or WhatsApp', 'People and skills'],
+  ];
+
+  let items = [];
+  let els = {};
+
+  function seedItems() {
+    return SEED.map(([id, name, group]) => ({ id, name, group, status: null, custom: false }));
+  }
+
+  function load() {
+    const data = Store.load(STORAGE_KEY);
+    items = data && Array.isArray(data.items) ? data.items : seedItems();
+  }
+
+  function persist() {
+    const ok = Store.save(STORAGE_KEY, { items });
+    els.saveError.hidden = ok;
+  }
+
+  function render() {
+    const answered = items.filter((i) => i.status).length;
+    els.progress.textContent = `${answered} of ${items.length} answered`;
+
+    // Encourage, never block: more Yes / With effort items give more options.
+    const usable = items.filter((i) => i.status === 'yes' || i.status === 'effort').length;
+    els.tip.textContent = usable >= GOOD_USABLE
+      ? `${usable} items marked Yes or With effort. That gives the app plenty to work with.`
+      : `You will get better results with at least ${GOOD_USABLE} items marked Yes or With effort. You have ${usable} so far.`;
+    els.tip.classList.toggle('tip-done', usable >= GOOD_USABLE);
+
+    const frag = document.createDocumentFragment();
+    for (const group of GROUPS) {
+      const groupItems = items.filter((i) => i.group === group);
+      if (!groupItems.length) continue;
+      const done = groupItems.filter((i) => i.status).length;
+      const complete = done === groupItems.length;
+      // A group starts folded only if everything in it is answered.
+      if (!openGroups.has(group)) openGroups.set(group, !complete);
+
+      const details = document.createElement('details');
+      details.className = `group${complete ? ' group-done' : ''}`;
+      details.dataset.group = group;
+      details.open = openGroups.get(group);
+      details.addEventListener('toggle', () => openGroups.set(group, details.open));
+
+      const summary = document.createElement('summary');
+      const name = document.createElement('span');
+      name.className = 'group-name';
+      name.textContent = group;
+      const count = document.createElement('span');
+      count.className = 'group-count';
+      count.textContent = complete ? '✓ All done' : `${done} of ${groupItems.length}`;
+      count.setAttribute('aria-label', complete ? 'all answered' : `${done} of ${groupItems.length} answered`);
+      summary.append(name, count);
+
+      const ul = document.createElement('ul');
+      ul.className = 'items';
+      for (const item of groupItems) ul.appendChild(renderItem(item));
+      details.append(summary, ul);
+      frag.appendChild(details);
+    }
+    els.list.replaceChildren(frag);
+  }
+
+  // Which groups are open, kept across re-renders. Not saved: on the next
+  // visit, finished groups start folded again.
+  const openGroups = new Map();
+  const FOLD_DELAY_MS = 450; // long enough to see the answer land before folding
+
+  function isComplete(group) {
+    return items.filter((i) => i.group === group).every((i) => i.status);
+  }
+
+  // Fold a group she has just finished and bring the next unfinished one into view.
+  function foldFinished(group) {
+    setTimeout(() => {
+      if (!isComplete(group)) return; // she changed her mind in the meantime
+      openGroups.set(group, false);
+      render();
+      const next = [...els.list.querySelectorAll('details.group')].find((d) => !d.classList.contains('group-done'));
+      (next || els.list.querySelector(`details[data-group="${group}"]`))?.scrollIntoView({ block: 'start' });
+    }, FOLD_DELAY_MS);
+  }
+
+  function renderItem(item) {
+    const li = document.createElement('li');
+    li.className = 'item';
+    li.dataset.id = item.id;
+
+    const head = document.createElement('div');
+    head.className = 'item-head';
+    const name = document.createElement('div');
+    name.className = 'item-name';
+    name.id = `name-${item.id}`;
+    name.textContent = item.name;
+    head.appendChild(name);
+
+    if (item.custom) {
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'remove-btn';
+      remove.dataset.action = 'remove';
+      remove.textContent = 'Remove';
+      head.appendChild(remove);
+    }
+
+    const choice = document.createElement('div');
+    choice.className = 'choice';
+    choice.setAttribute('role', 'group');
+    choice.setAttribute('aria-labelledby', name.id);
+    for (const [status, label] of [['yes', 'Yes'], ['effort', 'With effort'], ['no', 'No']]) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.status = status;
+      btn.setAttribute('aria-pressed', String(item.status === status));
+      btn.textContent = label;
+      choice.appendChild(btn);
+    }
+
+    li.append(head, choice);
+    return li;
+  }
+
+  function onListClick(e) {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const li = btn.closest('.item');
+    const item = items.find((i) => i.id === li.dataset.id);
+    if (!item) return;
+
+    if (btn.dataset.action === 'remove') {
+      if (!confirm(`Remove "${item.name}"?`)) return;
+      items = items.filter((i) => i !== item);
+    } else if (btn.dataset.status) {
+      const wasComplete = isComplete(item.group);
+      // Tapping the answer that is already chosen clears it (back to unanswered).
+      item.status = item.status === btn.dataset.status ? null : btn.dataset.status;
+      if (!wasComplete && isComplete(item.group)) foldFinished(item.group);
+    } else {
+      return;
+    }
+    persist();
+    render();
+  }
+
+  function onAdd(e) {
+    e.preventDefault();
+    const name = els.addInput.value.trim();
+    if (!name) {
+      els.addInput.focus();
+      return;
+    }
+    if (items.some((i) => i.name.toLowerCase() === name.toLowerCase())) {
+      alert('That is already on the list.');
+      return;
+    }
+    const id = `custom-${Date.now().toString(36)}`;
+    items.push({ id, name, group: CUSTOM_GROUP, status: null, custom: true });
+    openGroups.set(CUSTOM_GROUP, true); // so she can answer the new item straight away
+    els.addInput.value = '';
+    persist();
+    render();
+    // Bring the new item into view so she can mark it straight away.
+    document.querySelector(`[data-id="${id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function onReset() {
+    if (!confirm('Clear all your answers and remove the items you added? The list goes back to how it started.')) return;
+    items = seedItems();
+    openGroups.clear();
+    persist();
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  function init() {
+    els = {
+      list: document.getElementById('cap-list'),
+      progress: document.getElementById('progress'),
+      tip: document.getElementById('usable-tip'),
+      saveError: document.getElementById('save-error'),
+      addForm: document.getElementById('add-form'),
+      addInput: document.getElementById('add-input'),
+      reset: document.getElementById('reset-btn'),
+    };
+    load();
+    els.list.addEventListener('click', onListClick);
+    els.addForm.addEventListener('submit', onAdd);
+    els.reset.addEventListener('click', onReset);
+    render();
+  }
+
+  // Read-only view for later screens (analysis and package building).
+  function getItems() {
+    return items.map((i) => ({ ...i }));
+  }
+
+  // Used by the package screen when she says she cannot do something.
+  function setStatus(id, status) {
+    const item = items.find((i) => i.id === id);
+    if (!item) return;
+    item.status = status;
+    persist();
+    render();
+  }
+
+  return { init, getItems, setStatus };
+})();
+
+</script>
+  <script>
+// Removes personal details from guest feedback before it is stored.
+//
+// Pattern-based, so it is honest about its limits:
+//   - email addresses, phone numbers and @handles are removed reliably;
+//   - names are removed only where they are easy to recognise: sign-offs
+//     ("– Anna", "Thanks, Anna K."), "Name: …" or "Name (Country): …" at the
+//     start, and "my name is …" in English, French and German.
+// A name written in the middle of a sentence ("we came with Peter") is not
+// caught. The analysis only needs what guests said, never who said it.
+const Privacy = (() => {
+  const NAME = '\\p{Lu}[\\p{L}\'’-]+';
+  const ONE = `${NAME}(?:\\s+(?:${NAME}|\\p{Lu}\\.))?(?:\\s+${NAME})?`; // 1–3 capitalised words
+  const NAME_RUN = `${ONE}(?:\\s*(?:and|&|und|et|y)\\s+${ONE})?`; // "Sarah and Tom"
+
+  // Capitalised words that follow a sign-off or start a line but are not names.
+  const NOT_NAMES = new Set([
+    'Beaucoup', 'Schön', 'Sehr', 'Vielmals', 'Again', 'So', 'Much', 'Everyone', 'All',
+    'Note', 'Tip', 'Update', 'Edit', 'Highlight', 'Highlights', 'Pros', 'Cons', 'Overall', 'Summary',
+  ]);
+  const isName = (run) => !NOT_NAMES.has(run.split(/\s+/)[0]);
+
+  const EMAIL = /[\p{L}\p{N}._%+-]+@[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+/gu;
+  const HANDLE = /(^|[\s(])@[\p{L}\p{N}_.]{2,}/gu;
+  const PHONE = /(?:\+|\b)\d[\d\s().\/-]{5,}\d\b/g;
+  const YEAR_RANGE = /^\d{4}\s*[-–\/]\s*\d{4}$/;
+
+  const INTRO = new RegExp(
+    `\\b((?:[Mm]y name is|[Ii] am called|[Jj]e m['’]appelle|[Mm]ein [Nn]ame ist|[Ii]ch hei(?:ß|ss)e)\\s+)(${NAME_RUN})`,
+    'gu',
+  );
+  const PREFIX = new RegExp(`^(${NAME_RUN})\\s*(?:\\([^)]{0,40}\\))?\\s*:\\s+`, 'u');
+  const SIGNOFF = new RegExp(
+    `((?:^|[\\s,.!])(?:[-–—~]\\s*|(?:[Tt]hanks|[Tt]hank you|[Cc]heers|[Rr]egards|[Bb]est wishes|[Mm]erci|[Dd]anke|[Gg]rüße|[Gg]ruß)[,!.]?\\s+))(${NAME_RUN})\\.?\\s*[.!]?\\s*$`,
+    'u',
+  );
+
+  // Returns { text, removed } where removed is true if anything was taken out.
+  function scrub(input) {
+    let text = String(input);
+    const before = text;
+
+    text = text.replace(EMAIL, '[email]');
+    text = text.replace(HANDLE, '$1[name]');
+    text = text.replace(PHONE, (m) => {
+      const digits = m.replace(/\D/g, '').length;
+      return digits >= 7 && !YEAR_RANGE.test(m.trim()) ? '[phone]' : m;
+    });
+    text = text.replace(INTRO, '$1[name]');
+    text = text.replace(PREFIX, (m, run) => (isName(run) ? '' : m));
+    text = text.replace(SIGNOFF, (m, lead, run) => (isName(run) ? `${lead}[name]` : m));
+
+    text = text.replace(/\s{2,}/g, ' ').trim();
+    return { text, removed: text !== before.trim() };
+  }
+
+  // True if nothing useful is left (only removed details and punctuation).
+  function isEmpty(text) {
+    return !text.replace(/\[(?:email|phone|name)\]/g, '').replace(/[\s\p{P}\p{S}]/gu, '');
+  }
+
+  return { scrub, isEmpty };
+})();
+
+</script>
+  <script>
+// Splits a messy paste (Google Maps, Booking.com, TripAdvisor, a Word
+// document) into separate reviews using fixed rules. No model is involved,
+// so it works offline and can only keep or drop text that was pasted, never
+// add any. Each review is the pasted text, with interface clutter removed
+// from its start or end.
+//
+// parse(blob) returns:
+//   reviews:  [{ text }]          what looks like guest review text
+//   dropped:  [{ text, why }]     lines left out, with a short reason
+const PasteParser = (() => {
+  // ---- Lines that are interface text, not review text ----
+
+  const STARS = /^[\s★☆⭐✩✪✭✮✯✰*·•]+$/u;
+  const RATING = [
+    /^\(?\d+([.,]\d)?\s*(\/|out of|sur|von|of)\s*(5|10)\)?(\s*(stars?|étoiles?|sterne?n?))?\.?$/i, // 4/5, 4.5 out of 5
+    /^(rated|bewertet mit|noté)\s+\d+([.,]\d)?\b.*$/i,
+    /^\d+([.,]\d)?\s*(stars?|étoiles?|sterne?n?)$/i,
+    /^(score|note|punktzahl|bewertung)\s*:?\s*\d+([.,]\d)?$/i,
+    /^\d{1,2}([.,]\d)?$/, // "9.2" or "8" on its own (Booking score)
+    // Booking score word with its score on the same line: "Wonderful 9.0"
+    /^(exceptional|superb|fabulous|wonderful|very good|good|pleasant|okay|poor|disappointing|review score|exceptionnel|superbe|fabuleux|très bien|bien|außergewöhnlich|hervorragend|fabelhaft|sehr gut|gut)\s*\d+([.,]\d)?$/i,
+  ];
+  // A score word on its own ("Very good") is a rating only next to a bare
+  // score line ("9.0"); otherwise it is a guest's own (short) review.
+  const SCORE_WORD = /^(exceptional|superb|fabulous|wonderful|very good|good|pleasant|okay|poor|disappointing|review score|exceptionnel|superbe|fabuleux|très bien|bien|außergewöhnlich|hervorragend|fabelhaft|sehr gut|gut)$/i;
+  const BARE_SCORE = /^\d{1,2}([.,]\d)?$/;
+  const DATE = [
+    // "2 weeks ago", "a month ago", "vor 3 Monaten", "il y a 2 mois", "Edited 3 days ago"
+    /^(edited\s+)?(a|an|one|\d+)\s+(second|minute|hour|day|week|month|year)s?\s+ago$/i,
+    /^(bearbeitet\s+)?vor\s+(einer?|einem|\d+)\s+(sekunde|minute|stunde|tag|woche|monat|jahr)(e|en|n)?$/i,
+    /^(modifié\s+)?il y a\s+(un|une|\d+)\s+(seconde|minute|heure|jour|semaine|mois|an)s?$/i,
+    /^(yesterday|today|gestern|heute|hier|aujourd'hui|aujourd’hui)$/i,
+    // "last month", "last week", "last year" (and "letzten Monat", "le mois dernier")
+    /^(last|past|this)\s+(week|month|year|weekend|summer|winter)$/i,
+    /^(letzte[nrs]?|vergangene[nrs]?)\s+(woche|monat|jahr|wochenende|sommer|winter)$/i,
+    /^(la|le|l'|l’)\s*(semaine|mois|année|an|week-end|été|hiver)\s+(dernière|dernier)$/i,
+    // "12 March 2025", "March 2025", "12/03/2025", "2025-03-12", "Mar 12, 2025"
+    /^(reviewed|date of stay|stayed in|visited in|date of visit|written|bewertet am|datum|écrit le|séjour)\s*:?.*\d{4}.*$/i,
+    /^\d{1,2}[./-]\d{1,2}[./-]\d{2,4}$/,
+    /^\d{4}-\d{2}-\d{2}$/,
+    /^(\d{1,2}\.?\s+)?[\p{L}]{3,10}\.?\s+(\d{1,2},?\s+)?\d{4}$/u,
+    /^\d+\s+(night|nights|nuit|nuits|nacht|nächte)\b.*$/i, // "1 night · March 2025"
+  ];
+  const UI = [
+    /^local guide\b.*$/i, // "Local Guide · 45 reviews · 120 photos"
+    /^\d+\s+(reviews?|photos?|bewertungen|rezensionen|fotos|avis|contributions?|helpful votes?)(\s*[·•,]\s*\d+\s+\p{L}+)*$/iu,
+    /^(helpful|not helpful|like|share|report|reply|more|read more|less|show more|show less|see more|see original|show original|translate|translated by google|hilfreich|teilen|melden|mehr|weiterlesen|utile|partager|signaler|plus|lire la suite|voir l'original|voir l’original)\s*(\(\d+\))?$/i,
+    /^\d+\s+(people found this helpful|person found this helpful|helpful|likes?)$/i,
+    /^(new|neu|nouveau)$/i,
+    /^(liked|disliked|pros|cons|positive|negative|gefallen|nicht gefallen|a aimé|n'a pas aimé|n’a pas aimé)\s*[:·]?$/i,
+    /^(couple|solo traveller|solo traveler|family with young children|family with older children|group|group of friends|business traveller|paar|familie|alleinreisend|en couple|famille|voyageur individuel)$/i,
+    /^stayed in\b.{0,40}$/i, // "Stayed in Deluxe Double Room"
+    /^(trip type|reiseart|type de voyage)\s*:.{0,30}$/i,
+    /^(written by|reviewed by|posted by)\s+.{1,40}$/i,
+    /^(this review is the subjective opinion|cet avis est l'opinion|diese bewertung ist die subjektive).*$/i,
+  ];
+  // Markers after which the next block is not the guest's own text.
+  const OWNER_REPLY = /^(response from the owner|response from the property|owner's response|owner’s response|antwort des inhabers|antwort vom inhaber|réponse du propriétaire|réponse de l'établissement|réponse de l’établissement)\b.*$/i;
+  // "(Original)" alone, or at the start of a line with the source text after it.
+  const ORIGINAL = /^(\((original|originaltext|texte original)\)|(original|originaltext|texte original)\s*:?$)/i;
+
+  // A reviewer name or country on its own: 1–4 capitalised words, no
+  // sentence punctuation, no digits. ("Anna Schmidt", "Pierre D.", "Germany")
+  const NAME_LIKE = /^(\p{Lu}[\p{L}'’-]*\.?)(\s+(\p{Lu}[\p{L}'’-]*\.?|de|van|von|der|da|di|le|la))*\s*$/u;
+  const MAX_NAME_WORDS = 4;
+  // Names joined by "and": "David and Jen", "Sarah & Tom Miller", "Jonas und Lena".
+  const ONE_NAME = '\\p{Lu}[\\p{L}\'’-]*\\.?(?:\\s+\\p{Lu}[\\p{L}\'’-]*\\.?){0,2}';
+  const NAME_PAIR = new RegExp(`^${ONE_NAME}\\s*(?:and|&|und|et|y|e)\\s+${ONE_NAME}\\s*$`, 'u');
+
+  // Removed from the start or end of a line, keeping the rest.
+  const LEAD_CLUTTER = [
+    /^\s*(?:[-–—•*▪◦·]|\d{1,3}[.)])\s+/, // bullets and "1." numbering from Word
+    /^\(translated by google\)\s*/i,
+    /^\((übersetzt von google|traduit par google)\)\s*/i,
+    /^(liked|disliked|pros|cons|gefallen|nicht gefallen|a aimé|n'a pas aimé|n’a pas aimé)\s*[:·-]\s*/i, // "Liked · Lovely host"
+    /^[★☆⭐]+\s*/u,
+  ];
+  // "…More" only after an ellipsis, so "come back for more" keeps its last word.
+  const TRAIL_CLUTTER = [/\s*(…|\.\.\.)\s*(more|mehr|plus)$/i, /\s*(…|\.\.\.)?\s*(read more|lire la suite|weiterlesen)$/i];
+
+  // Words that, at the end of a line, mean the sentence continues on the next.
+  const CONTINUES = /(,|;|:|-|–|\b(and|or|but|the|a|an|to|of|with|for|in|on|at|our|we|was|und|oder|aber|die|der|das|mit|für|et|ou|mais|le|la|les|de|du|des|avec|pour))$/i;
+  const ENDS_SENTENCE = /[.!?…)"”»]$/;
+
+  function classify(line) {
+    if (STARS.test(line)) return 'star rating';
+    if (RATING.some((r) => r.test(line))) return 'rating';
+    const bare = line.replace(/[.!…]+$/, '');
+    if (DATE.some((r) => r.test(bare))) return 'date';
+    if (UI.some((r) => r.test(line))) return 'website text';
+    if (OWNER_REPLY.test(line)) return 'owner reply';
+    if (ORIGINAL.test(line)) return 'original';
+    if (NAME_LIKE.test(line) && line.split(/\s+/).length <= MAX_NAME_WORDS) return 'name or place';
+    if (NAME_PAIR.test(line)) return 'name or place';
+    return null;
+  }
+
+  function clean(line) {
+    let t = line;
+    for (const r of LEAD_CLUTTER) t = t.replace(r, '');
+    for (const r of TRAIL_CLUTTER) t = t.replace(r, '');
+    return t.trim();
+  }
+
+  function parse(blob) {
+    const lines = String(blob)
+      .replace(/\r\n?/g, '\n')
+      .replace(/[   ]/g, ' ')
+      .split('\n')
+      .map((l) => l.replace(/\s+/g, ' ').trim());
+
+    const reviews = [];
+    const dropped = [];
+    let current = null; // lines of the review being built
+    let skipping = null; // reason, while skipping an owner reply or original text
+
+    const finish = () => {
+      if (current) reviews.push(current.join(' '));
+      current = null;
+    };
+
+    const nearScore = (i) => {
+      const prev = lines.slice(0, i).reverse().find(Boolean);
+      const next = lines.slice(i + 1).find(Boolean);
+      return BARE_SCORE.test(prev || '') || BARE_SCORE.test(next || '');
+    };
+
+    for (const [i, raw] of lines.entries()) {
+      if (SCORE_WORD.test(raw) && nearScore(i)) {
+        finish();
+        dropped.push({ text: raw, why: 'rating' });
+        continue;
+      }
+      if (!raw) {
+        // A blank line ends a review, and ends any block being skipped.
+        finish();
+        skipping = null;
+        continue;
+      }
+      const kind = classify(raw);
+      if (kind === 'owner reply' || kind === 'original') {
+        finish();
+        skipping = kind === 'owner reply' ? 'owner reply' : 'original of a translated review';
+        dropped.push({ text: raw, why: skipping });
+        continue;
+      }
+      if (kind) {
+        // Interface text sits between reviews, so it also ends one.
+        finish();
+        dropped.push({ text: raw, why: kind });
+        continue;
+      }
+      if (skipping) {
+        dropped.push({ text: raw, why: skipping });
+        continue;
+      }
+
+      const text = clean(raw);
+      if (!/\p{L}.*\p{L}/u.test(text)) {
+        dropped.push({ text: raw, why: 'no words' });
+        continue;
+      }
+      // Join to the previous line only if that line clearly runs on.
+      const prev = current && current[current.length - 1];
+      const runsOn =
+        prev && !ENDS_SENTENCE.test(prev) && (CONTINUES.test(prev) || /^\p{Ll}/u.test(text));
+      if (runsOn) current.push(text);
+      else {
+        finish();
+        current = [text];
+      }
+    }
+    finish();
+
+    // The same text pasted twice is kept once. Google also shows a cut-off
+    // copy ("…More") next to the full text: the shorter copy is dropped.
+    const key = (t) => t.toLowerCase().replace(/[\s.…!?]+$/, '');
+    const unique = [];
+    for (const text of reviews) {
+      const k = key(text);
+      if (unique.some((u) => key(u.text) === k)) {
+        dropped.push({ text, why: 'repeated' });
+        continue;
+      }
+      const longer = k.length >= 15 && reviews.some((o) => o !== text && key(o).length > k.length && key(o).startsWith(k));
+      if (longer) dropped.push({ text, why: 'shortened copy' });
+      else unique.push({ text });
+    }
+    return { reviews: unique, dropped };
+  }
+
+  return { parse };
+})();
+
+</script>
+  <script>
+// Spots reviews too short or vague to say what guests liked or missed:
+// "Amazing!", "Very good", "Great tour", "Sehr gut", "Très bien".
+// They are kept as real reviews but not used for themes.
+//
+// Rule: at most MAX_WORDS words, and every word is general praise or filler.
+// A review with any concrete word ("Lovely views", "Too steep") is not vague.
+const Vague = (() => {
+  const MAX_WORDS = 4;
+  const WORDS = new Set(
+    `
+    amazing nice good great excellent super superb perfect wonderful lovely awesome fantastic brilliant
+    beautiful fabulous incredible outstanding best fine ok okay cool fun wow top recommended recommend
+    highly very really so truly just absolutely totally simply quite
+    thanks thank you love loved liked enjoyed it this that was is were all everything
+    place tour visit trip experience time day stay farm
+    a an the and of for our we us 5 five star stars 10
+    toll schön gut sehr prima klasse wunderbar wunderschön super spitze empfehlenswert danke alles war ist
+    die der das ein eine und
+    tolle toller tolles schöne schöner schönes gute guter gutes tollen schönen guten
+    erlebnis ausflug führung besuch tag
+    génial genial magnifique parfait parfaite bien très tres top merci beaucoup superbe excellent excellente
+    c'était c’était était tout un une le la les et
+    expérience visite séjour moment journée
+    `
+      .trim()
+      .split(/\s+/),
+  );
+
+  function isVague(text) {
+    const words = text
+      .toLowerCase()
+      .replace(/\[(?:email|phone|name)\]/g, ' ')
+      .match(/[\p{L}\p{N}'’]+/gu);
+    if (!words) return true;
+    return words.length <= MAX_WORDS && words.every((w) => WORDS.has(w));
+  }
+
+  return { isVague };
+})();
+
+</script>
+  <script>
+// Guesses which language a review is in, with fixed rules, so the app can
+// tell her when a review is not in English. Nothing is translated: that would
+// need a model the app does not have offline.
+//
+// guess(text) returns a language name ("German"), "Not in English" when it is
+// clearly not English but the language is unclear, or null for English or
+// when there is too little to tell.
+const Language = (() => {
+  // Writing systems other than Latin identify the language (or family) directly.
+  const SCRIPTS = [
+    ['Sinhala', /[඀-෿]/],
+    ['Tamil', /[஀-௿]/],
+    ['Hindi or another Devanagari language', /[ऀ-ॿ]/],
+    ['Japanese', /[぀-ヿ]/],
+    ['Korean', /[가-힯]/],
+    ['Chinese', /[一-鿿]/],
+    ['Russian or another Cyrillic language', /[Ѐ-ӿ]/],
+    ['Arabic', /[؀-ۿ]/],
+    ['Hebrew', /[֐-׿]/],
+    ['Thai', /[฀-๿]/],
+    ['Greek', /[Ͱ-Ͽ]/],
+  ];
+
+  // Common short words that are typical of each language.
+  const WORDS = {
+    English: 'the and was were we our is it to of with very but for this that you they have had would could',
+    German: 'der die das und ist war wir sehr nicht ein eine mit zu auf für es ich uns den dem hat haben hätte wurde man zum',
+    French: 'le la les et est était nous très pas un une des du au aux avec pour ce on qui que il elle avons',
+    Spanish: 'el los las y es muy una con para que fue nos del pero lo por hay estaba',
+    Italian: 'il lo gli è molto una con per che era ci non della degli nel abbiamo',
+    Dutch: 'de het een en is was zeer heel niet wij we met voor van ons waren hebben',
+    Portuguese: 'os as é muito uma com para que foi não nós do da dos das em',
+  };
+  const WORD_SETS = Object.fromEntries(
+    Object.entries(WORDS).map(([lang, list]) => [lang, new Set(list.split(' '))]),
+  );
+
+  // Letters that point strongly to one language.
+  const LETTERS = [
+    ['German', /[ßäöü]/i],
+    ['French', /[çœèêëîôù]|\b[cdjlmnst]['’]\p{L}/iu],
+    ['Spanish', /[ñ¿¡]/i],
+    ['Portuguese', /[ãõ]/i],
+    ['Italian', /[ìò]/i],
+  ];
+
+  function guess(text) {
+    for (const [name, re] of SCRIPTS) if (re.test(text)) return name;
+
+    const words = text.toLowerCase().match(/\p{L}+(?:['’]\p{L}+)?/gu) || [];
+    const score = Object.fromEntries(Object.keys(WORD_SETS).map((l) => [l, 0]));
+    for (const w of words) {
+      for (const [lang, set] of Object.entries(WORD_SETS)) if (set.has(w)) score[lang] += 1;
+    }
+    for (const [lang, re] of LETTERS) if (re.test(text)) score[lang] += 2;
+    // 'é' and 'à' are common in French and rare in Dutch, which shares 'de' and 'en'.
+    if (/[éà]/i.test(text)) score.French += 1;
+
+    const ranked = Object.entries(score)
+      .filter(([l]) => l !== 'English')
+      .sort((a, b) => b[1] - a[1]);
+    const [best, bestScore] = ranked[0];
+    const secondScore = ranked[1][1];
+    // Not enough signal, or English looks at least as likely: say nothing.
+    if (bestScore < 2 || bestScore <= score.English) return null;
+    return bestScore > secondScore ? best : 'Not in English';
+  }
+
+  return { guess };
+})();
+
+</script>
+  <script>
+// ============================================================
+// EXAMPLE DATA ONLY. These are made-up reviews for testing,
+// not real guest feedback. They are loaded only when she taps
+// "Load example reviews", and are tagged so they can be removed.
+//
+// 43 reviews: 19 English, 9 German, 10 French, 5 Sinhala.
+// Groups, chosen so different farm answers lead to different packages:
+//   watching the roasting (10, the largest) -> hand roaster
+//   wanting to taste the coffee (6)      -> brewing gear
+//   wanting to buy coffee to take home (6) -> roasted coffee to sell
+//   enjoying the home-cooked lunch (5)   -> rice and curry / outdoor kitchen
+//   steep walk (4), varied (12)
+// The Sinhala ones are set aside by the app (see feedback.js).
+// ============================================================
+const EXAMPLE_REVIEWS = [
+  // Watching the roasting
+  'Watching her roast the beans in a clay pot over the fire was the best part of our trip.',
+  'Loved the roasting. You could smell it from the garden.',
+  'The smell of the beans roasting in the pan was unforgettable.',
+  'Seeing the coffee roasted by hand over the fire was fascinating.',
+  'Our favourite part was the roasting demonstration.',
+  'Es war faszinierend zuzusehen, wie die Bohnen über dem Feuer geröstet wurden. Dieser Duft!',
+  'Das Rösten in der Pfanne zu sehen war das Highlight unserer Reise.',
+  'Voir la torréfaction à la main, c’était magique.',
+  'On a adoré voir griller le café sur le feu de bois.',
+  'කෝපි බෝංචි බදින හැටි බලන්න ලැබුණු එක ගොඩක් සතුටක්.',
+
+  // Wishing they could taste the coffee afterwards
+  'Wish we could have tasted the coffee we roasted at the end!',
+  'Great tour, but we left without a single cup of coffee. Would pay extra for a tasting.',
+  'Would love to sit down and drink the coffee afterwards, with that view.',
+  'Schade, dass wir den Kaffee am Ende nicht probieren konnten.',
+  'Dommage de ne pas avoir pu goûter le café après la visite !',
+  'අන්තිමට කෝපි කෝප්පයක් බොන්න ලැබුණා නම් හොඳයි.',
+
+  // Wanting to buy coffee to take home
+  'I wanted to buy beans to take home for my family, but there was nothing to buy.',
+  'Is there a shop? We wanted packets of your beans to take home as gifts.',
+  'Ich hätte gern frisch gerösteten Kaffee gekauft, aber es gab keinen zu kaufen.',
+  'Wir wollten Kaffeebohnen kaufen und mit nach Hause nehmen.',
+  'J’aurais voulu acheter un paquet de grains pour ramener à la maison.',
+  'Nous voulions acheter des sachets de café en souvenir.',
+
+  // Enjoying the home-cooked lunch
+  'The home cooked lunch was delicious, especially the dhal.',
+  'Best rice and curry we had in Sri Lanka, cooked by the family.',
+  'Das hausgemachte Mittagessen war köstlich.',
+  'Accueil chaleureux, et le rice and curry du déjeuner était délicieux.',
+  'Le repas fait maison était excellent, avec des légumes du jardin.',
+
+  // Steep walk
+  'The path down to the coffee trees is steep. My mum struggled on the way back up.',
+  'Der Weg zur Plantage ist ziemlich steil, gute Schuhe sind ein Muss.',
+  'Le chemin est très raide, surtout après la pluie. Attention aux glissades.',
+  'කන්ද නගින පාර ගොඩක් බෑවුම්, වයසක අයට අමාරුයි.',
+
+  // Varied
+  'Our tuk-tuk driver had trouble finding the farm. Maybe a sign on the main road?',
+  'Such a peaceful place. We saw a giant squirrel and lots of birds.',
+  'The kids loved picking the red coffee cherries.',
+  'Would be great if you took card payment. We had to go back to town for cash.',
+  'Started raining halfway through but they had umbrellas ready for us.',
+  'The cinnamon peeling demo was a surprise highlight.',
+  'Sehr herzliche Familie, wir haben uns sofort willkommen gefühlt.',
+  'Die Aussicht über die Berge war atemberaubend.',
+  'Nous aurions aimé plus d’explications sur la culture du poivre.',
+  'Il y avait beaucoup de sangsues pendant la balade, prévoyez du sel !',
+  'ගෙදර හදපු කෑම හරිම රසයි, හැමෝම හොඳට සැලකුවා.',
+  'ළමයින්ට කෝපි ගෙඩි කඩන්න ලැබුණු එකට ගොඩක් ආසයි.',
+];
+
+</script>
+  <script>
+// Screen 2: guest feedback.
+// Each entry: { id, text, source: 'spoken' | 'written' | 'example', added: ISO date }.
+const Feedback = (() => {
+  const STORAGE_KEY = 'feedback.v1';
+  const SOURCE_LABELS = { spoken: 'Spoken', written: 'Written', example: 'Example' };
+
+  // Scripts the embedding model was not trained on. It groups these reviews by
+  // language rather than meaning, so the analysis sets them aside.
+  const UNREADABLE_SCRIPTS = [
+    { name: 'Sinhala', re: /[඀-෿]/ },
+    { name: 'Tamil', re: /[஀-௿]/ },
+  ];
+
+  function unreadableScript(text) {
+    return UNREADABLE_SCRIPTS.find((s) => s.re.test(text))?.name || null;
+  }
+
+  let items = [];
+  let els = {};
+  let nextId = 0;
+
+  function makeId() {
+    return `fb-${Date.now().toString(36)}-${(nextId++).toString(36)}`;
+  }
+
+  function load() {
+    const data = Store.load(STORAGE_KEY);
+    items = data && Array.isArray(data.items) ? data.items : [];
+    // Feedback saved before personal details were removed gets cleaned once.
+    let changed = false;
+    items = items
+      .map((i) => {
+        const { text, removed } = Privacy.scrub(i.text);
+        if (removed) changed = true;
+        return removed ? { ...i, text } : i;
+      })
+      .filter((i) => !Privacy.isEmpty(i.text));
+    if (changed) Store.save(STORAGE_KEY, { items });
+  }
+
+  function persist() {
+    const ok = Store.save(STORAGE_KEY, { items });
+    els.saveError.hidden = ok;
+  }
+
+  function add(rawTexts, source) {
+    const added = new Date().toISOString();
+    // Personal details are removed before anything is stored.
+    const cleaned = rawTexts.map((t) => Privacy.scrub(t));
+    const texts = cleaned.map((c) => c.text).filter((t) => !Privacy.isEmpty(t));
+    const scrubbedCount = cleaned.filter((c) => c.removed).length;
+    showPrivacyStatus(scrubbedCount, rawTexts.length - texts.length);
+
+    // Newest first, keeping the order she entered them in.
+    const fresh = texts.map((text) => ({ id: makeId(), text, source, added }));
+    items = fresh.concat(items);
+    persist();
+    render();
+    // If she just added something that will not be counted, make sure she sees why.
+    const notCounted = texts.some(unreadableScript);
+    if (notCounted) els.unreadable.scrollIntoView({ block: 'nearest' });
+    return { notCounted, scrubbed: scrubbedCount };
+  }
+
+  function showPrivacyStatus(scrubbed, dropped) {
+    const parts = [];
+    if (scrubbed) parts.push(`Personal details removed from ${scrubbed} ${scrubbed === 1 ? 'comment' : 'comments'}.`);
+    if (dropped) parts.push(`${dropped} ${dropped === 1 ? 'line was' : 'lines were'} only personal details, so not saved.`);
+    els.privacyStatus.textContent = parts.join(' ');
+    els.privacyStatus.hidden = parts.length === 0;
+  }
+
+  // ---- Paste box: split a messy paste, let her check it, then save ----
+
+  // What the paste box would save, after splitting and removing personal
+  // details. A line that is nothing but a sign-off ("Thanks, [name]") is left out.
+  function detect(blob) {
+    const { reviews, dropped } = PasteParser.parse(blob);
+    const kept = []; // reviews to use for themes
+    const short = []; // real reviews, but too short or vague to use for themes
+    const scrubbed = new Set(); // texts that had personal details removed
+    for (const r of reviews) {
+      const { text, removed } = Privacy.scrub(r.text);
+      if (removed) scrubbed.add(text);
+      const words = text.replace(/\[(?:email|phone|name)\]/g, '').match(/\p{L}+/gu) || [];
+      if (Privacy.isEmpty(text) || (words.length <= 1 && text !== r.text)) {
+        dropped.push({ text: r.text, why: 'only a name or contact details' });
+      } else if (Vague.isVague(text)) {
+        short.push(text);
+      } else {
+        kept.push(text);
+      }
+    }
+    return { kept, short, dropped, scrubbed };
+  }
+
+  // { kept, short, dropped } while she is checking a paste
+  let preview = null;
+
+  const SHOW_FIRST = 5;
+  let showAll = false;
+
+  // Text typed but not yet saved is kept on this phone, so a reload or a
+  // closed tab does not lose it.
+  const DRAFT_PASTE = 'draft.paste';
+  const DRAFT_SPOKEN = 'draft.spoken';
+  function saveDrafts() {
+    Store.save(DRAFT_PASTE, els.pasteInput.value);
+    Store.save(DRAFT_SPOKEN, els.spokenInput.value);
+  }
+
+  function updatePasteCount() {
+    const hasText = /\S/.test(els.pasteInput.value);
+    const found = hasText ? detect(els.pasteInput.value) : { kept: [], short: [] };
+    const n = found.kept.length + found.short.length;
+    els.pasteCount.textContent = hasText ? `${n} ${n === 1 ? 'review' : 'reviews'} found` : 'Nothing pasted yet';
+    els.pasteSave.textContent = n ? `Check ${n} ${n === 1 ? 'review' : 'reviews'}` : 'Check reviews';
+    els.pasteSave.disabled = !hasText;
+  }
+
+  function onPaste(e) {
+    e.preventDefault();
+    if (!/\S/.test(els.pasteInput.value)) return;
+    preview = detect(els.pasteInput.value);
+    els.pasteForm.hidden = true;
+    els.preview.hidden = false;
+    els.saveSummary.hidden = true;
+    renderPreview();
+    els.preview.scrollIntoView({ block: 'start' });
+  }
+
+  function previewItem(text, onRemove) {
+    const li = document.createElement('li');
+    li.className = 'pp-item';
+    const p = document.createElement('p');
+    p.className = 'pp-text';
+    p.textContent = text;
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'remove-btn';
+    remove.textContent = 'Remove';
+    remove.addEventListener('click', onRemove);
+    li.append(p, remove);
+    return li;
+  }
+
+  function renderPreview() {
+    const use = preview.kept.length;
+    const short = preview.short.length;
+    const n = use + short;
+    els.previewTitle.textContent = n ? `Found ${n} ${n === 1 ? 'review' : 'reviews'}` : 'No reviews found';
+    els.previewSave.textContent = n ? `Save ${n} ${n === 1 ? 'review' : 'reviews'}` : 'Save reviews';
+    els.previewSave.disabled = n === 0;
+
+    const removeFrom = (list, i) => () => {
+      preview.dropped.unshift({ text: list[i], why: 'removed by you' });
+      list.splice(i, 1);
+      renderPreview();
+    };
+    els.previewList.replaceChildren(...preview.kept.map((t, i) => previewItem(t, removeFrom(preview.kept, i))));
+
+    els.previewShort.hidden = short === 0;
+    els.previewShortTitle.textContent = `Kept, but too short to use for themes: ${short}`;
+    els.previewShortList.replaceChildren(...preview.short.map((t, i) => previewItem(t, removeFrom(preview.short, i))));
+
+    const d = preview.dropped.length;
+    els.previewDropped.hidden = d === 0;
+    els.previewDroppedTitle.textContent = `Left out: ${d} ${d === 1 ? 'line' : 'lines'} (names, dates, ratings and website text)`;
+    const left = document.createDocumentFragment();
+    preview.dropped.forEach((item, i) => {
+      const li = document.createElement('li');
+      li.className = 'pp-dropped-item';
+      const p = document.createElement('p');
+      p.className = 'pp-text';
+      p.textContent = item.text;
+      const why = document.createElement('span');
+      why.className = 'pp-why';
+      why.textContent = item.why;
+      const back = document.createElement('button');
+      back.type = 'button';
+      back.className = 'pp-add-back';
+      back.textContent = 'Add back';
+      back.addEventListener('click', () => {
+        const { text, removed } = Privacy.scrub(item.text);
+        if (removed) preview.scrubbed.add(text);
+        (Vague.isVague(text) ? preview.short : preview.kept).push(text);
+        preview.dropped.splice(i, 1);
+        renderPreview();
+      });
+      li.append(p, why, back);
+      left.appendChild(li);
+    });
+    els.previewDroppedList.replaceChildren(left);
+  }
+
+  function closePreview() {
+    preview = null;
+    els.preview.hidden = true;
+    els.pasteForm.hidden = false;
+  }
+
+  // Plain words for each reason a line was left out, grouped for the summary.
+  const REASON_GROUPS = {
+    'website text': ['website text', 'website text'],
+    'name or place': ['a name or place', 'names or places'],
+    'star rating': ['a rating', 'ratings'],
+    rating: ['a rating', 'ratings'],
+    date: ['a date', 'dates'],
+    'owner reply': ['the owner’s reply', 'the owner’s reply'],
+    'original of a translated review': ['the original of a translated review', 'the original of a translated review'],
+    repeated: ['a repeat', 'repeats'],
+    'shortened copy': ['a repeat', 'repeats'],
+    'only a name or contact details': ['only a name or contact details', 'only a name or contact details'],
+    'no words': ['no words', 'no words'],
+    'removed by you': ['removed by you', 'removed by you'],
+  };
+
+  function renderSaveSummary(saved, shortCount, dropped, scrubbed) {
+    const counts = new Map();
+    for (const d of dropped) {
+      const forms = REASON_GROUPS[d.why] || [d.why, d.why];
+      const key = forms[1];
+      const c = counts.get(key) || { forms, n: 0 };
+      c.n += 1;
+      counts.set(key, c);
+    }
+    const lines = [...counts.values()]
+      .sort((a, b) => b.n - a.n)
+      .map(({ forms, n }) => `${n} ${n === 1 ? 'line' : 'lines'} left out as ${n === 1 ? forms[0] : forms[1]}`);
+    if (shortCount) lines.push(`${shortCount} ${shortCount === 1 ? 'review' : 'reviews'} kept but too short to use for themes`);
+    if (scrubbed) lines.push(`Personal details removed from ${scrubbed} ${scrubbed === 1 ? 'review' : 'reviews'}`);
+
+    const title = document.createElement('p');
+    title.className = 'summary-title';
+    title.textContent = `Saved ${saved} ${saved === 1 ? 'review' : 'reviews'}.`;
+    const ul = document.createElement('ul');
+    ul.className = 'summary-list';
+    for (const l of lines) {
+      const li = document.createElement('li');
+      li.textContent = l;
+      ul.appendChild(li);
+    }
+    els.saveSummary.replaceChildren(title, ...(lines.length ? [ul] : []));
+    els.saveSummary.hidden = false;
+  }
+
+  function onPreviewSave() {
+    if (!preview) return;
+    const all = preview.kept.concat(preview.short);
+    if (!all.length) return;
+    const result = add(all, 'written');
+    const notCounted = result.notCounted;
+    const scrubbed = result.scrubbed + all.filter((t) => preview.scrubbed.has(t)).length;
+    // The summary covers personal details too, so the one-line status is not needed.
+    els.privacyStatus.hidden = true;
+    renderSaveSummary(all.length, preview.short.length, preview.dropped, scrubbed);
+    els.pasteInput.value = '';
+    saveDrafts();
+    closePreview();
+    updatePasteCount();
+    (notCounted ? els.unreadable : els.saveSummary).scrollIntoView({ block: 'start' });
+  }
+
+  function onPreviewCancel() {
+    closePreview();
+    els.pasteForm.scrollIntoView({ block: 'start' });
+  }
+
+  function render() {
+    els.heading.textContent = items.length ? `Saved feedback (${items.length})` : 'Saved feedback';
+    els.empty.hidden = items.length > 0;
+
+    const hasExamples = items.some((i) => i.source === 'example');
+    els.examples.hidden = hasExamples;
+    els.clearExamples.hidden = !hasExamples;
+
+    const frag = document.createDocumentFragment();
+    // Newest few only, unless she asks for all, so Next stays within reach.
+    const shown = showAll ? items : items.slice(0, SHOW_FIRST);
+    for (const item of shown) {
+      const li = document.createElement('li');
+      li.className = 'fb-item';
+      li.dataset.id = item.id;
+
+      const text = document.createElement('p');
+      text.className = 'fb-text';
+      text.textContent = item.text;
+
+      const foot = document.createElement('div');
+      foot.className = 'fb-foot';
+      const tag = document.createElement('span');
+      tag.className = `tag tag-${item.source}`;
+      tag.textContent = SOURCE_LABELS[item.source] || item.source;
+      const tags = document.createElement('span');
+      tags.className = 'fb-tags';
+      tags.appendChild(tag);
+      const lang = Language.guess(item.text);
+      if (lang) {
+        // Not translated (that needs a model the app does not have offline).
+        const note = document.createElement('span');
+        note.className = 'tag tag-lang';
+        note.textContent = lang === 'Not in English' ? lang : `Appears to be ${lang}`;
+        tags.appendChild(note);
+      }
+      if (Vague.isVague(item.text)) {
+        const short = document.createElement('span');
+        short.className = 'tag tag-short';
+        short.textContent = 'Too short for themes';
+        tags.appendChild(short);
+      }
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'remove-btn';
+      remove.textContent = 'Remove';
+      foot.append(tags, remove);
+
+      li.append(text, foot);
+      frag.appendChild(li);
+    }
+    els.list.replaceChildren(frag);
+    const hiddenCount = items.length - SHOW_FIRST;
+    els.more.hidden = hiddenCount <= 0;
+    els.more.textContent = showAll ? 'Show fewer' : `Show all ${items.length} (${hiddenCount} more)`;
+    renderUnreadable();
+  }
+
+  function renderUnreadable() {
+    const notCounted = items.filter((i) => unreadableScript(i.text));
+    els.unreadable.hidden = notCounted.length === 0;
+    if (!notCounted.length) return;
+    const n = notCounted.length;
+    const langs = [...new Set(notCounted.map((i) => unreadableScript(i.text)))].join(' and ');
+    const first = document.createElement('p');
+    first.className = 'note-line';
+    const strong = document.createElement('strong');
+    strong.textContent = `${n} ${n === 1 ? 'review' : 'reviews'} in ${langs} ${n === 1 ? 'is' : 'are'} saved but not counted. `;
+    first.append(strong, `The app groups ${langs} reviews by language rather than by meaning, so counting ${n === 1 ? 'it' : 'them'} would create a theme that is not real.`);
+    const second = document.createElement('p');
+    second.className = 'note-line';
+    second.textContent = 'Instead, type a short English version of what the guest said in the “What did a guest say?” box above.';
+    els.unreadable.replaceChildren(first, second);
+  }
+
+  function onSpoken(e) {
+    e.preventDefault();
+    const text = els.spokenInput.value.trim();
+    if (!text) {
+      els.spokenInput.focus();
+      return;
+    }
+    els.saveSummary.hidden = true;
+    add([text], 'spoken');
+    els.spokenInput.value = '';
+    saveDrafts();
+    // Keep the keyboard up so she can add the next one straight away.
+    els.spokenInput.focus({ preventScroll: true });
+  }
+
+  function onListClick(e) {
+    const btn = e.target.closest('.remove-btn');
+    if (!btn) return;
+    const id = btn.closest('.fb-item').dataset.id;
+    const item = items.find((i) => i.id === id);
+    if (!item) return;
+    const preview = item.text.length > 60 ? `${item.text.slice(0, 60)}…` : item.text;
+    if (!confirm(`Remove this feedback?\n\n"${preview}"`)) return;
+    items = items.filter((i) => i !== item);
+    persist();
+    render();
+  }
+
+  function onLoadExamples() {
+    // Added after her own feedback so it is clear which is which.
+    const added = new Date().toISOString();
+    const examples = EXAMPLE_REVIEWS.map((text) => ({ id: makeId(), text, source: 'example', added }));
+    items = items.concat(examples);
+    persist();
+    render();
+  }
+
+  function onClearExamples() {
+    if (!confirm('Remove all example reviews? Your own feedback stays.')) return;
+    items = items.filter((i) => i.source !== 'example');
+    persist();
+    render();
+  }
+
+  function init() {
+    els = {
+      saveError: document.getElementById('fb-save-error'),
+      spokenForm: document.getElementById('spoken-form'),
+      spokenInput: document.getElementById('spoken-input'),
+      pasteForm: document.getElementById('paste-form'),
+      pasteInput: document.getElementById('paste-input'),
+      pasteCount: document.getElementById('paste-count'),
+      pasteSave: document.getElementById('paste-save'),
+      heading: document.getElementById('fb-heading'),
+      empty: document.getElementById('fb-empty'),
+      list: document.getElementById('fb-list'),
+      examples: document.getElementById('fb-examples'),
+      clearExamples: document.getElementById('fb-clear-examples'),
+      unreadable: document.getElementById('fb-unreadable'),
+      privacyStatus: document.getElementById('fb-privacy-status'),
+      more: document.getElementById('fb-more'),
+      preview: document.getElementById('paste-preview'),
+      previewTitle: document.getElementById('pp-title'),
+      previewList: document.getElementById('pp-list'),
+      previewDropped: document.getElementById('pp-dropped'),
+      previewDroppedTitle: document.getElementById('pp-dropped-title'),
+      previewDroppedList: document.getElementById('pp-dropped-list'),
+      previewSave: document.getElementById('pp-save'),
+      previewCancel: document.getElementById('pp-cancel'),
+      previewShort: document.getElementById('pp-short'),
+      previewShortTitle: document.getElementById('pp-short-title'),
+      previewShortList: document.getElementById('pp-short-list'),
+      saveSummary: document.getElementById('fb-save-summary'),
+    };
+    load();
+    els.spokenForm.addEventListener('submit', onSpoken);
+    els.pasteForm.addEventListener('submit', onPaste);
+    els.pasteInput.value = Store.load(DRAFT_PASTE) || '';
+    els.spokenInput.value = Store.load(DRAFT_SPOKEN) || '';
+    els.pasteInput.addEventListener('input', updatePasteCount);
+    els.pasteInput.addEventListener('input', saveDrafts);
+    els.spokenInput.addEventListener('input', saveDrafts);
+    els.more.addEventListener('click', () => {
+      showAll = !showAll;
+      render();
+      if (!showAll) els.heading.scrollIntoView({ block: 'start' });
+    });
+    els.previewSave.addEventListener('click', onPreviewSave);
+    els.previewCancel.addEventListener('click', onPreviewCancel);
+    els.list.addEventListener('click', onListClick);
+    els.examples.addEventListener('click', onLoadExamples);
+    els.clearExamples.addEventListener('click', onClearExamples);
+    updatePasteCount();
+    render();
+  }
+
+  // Read-only view for the analysis screen.
+  function getItems() {
+    return items.map((i) => ({ ...i }));
+  }
+
+  return { init, getItems, unreadableScript };
+})();
+
+</script>
+  <script>
+// Fixed catalogue of themes the app can recognise, and the fixed templates
+// used to build a package from them. Nothing here is generated: every word a
+// package can contain is written in this file.
+//
+// For each theme:
+//   label    Plain-English name shown to her.
+//   anchors  Example sentences (English). A review joins the theme when its
+//            embedding is close enough to one of these, in any language the
+//            model knows.
+//   kind     'want'     something guests valued or asked for; can become a package step
+//            'issue'    a problem; can become a package step that fixes it
+//            'strength' praise; shown, but nothing to build
+//   caps     Capability ids (from profile.js) that can deliver this step, in
+//            order of preference. Only ones marked Yes or With effort are used.
+//   need     What delivering it takes, in plain words. Used to match her own
+//            added items, and to say what is missing.
+//   step     The package step, exactly as shown.
+//   title    Short name used in the package name.
+const THEMES = [
+  {
+    id: 'roasting',
+    label: 'Enjoyed watching the roasting',
+    kind: 'want',
+    anchors: [
+      'Watching the coffee beans being roasted',
+      'The roasting over the fire was the highlight',
+      'We loved seeing the coffee roasted by hand',
+    ],
+    caps: ['hand-roaster'],
+    need: 'Roasting coffee beans by hand',
+    step: 'Roast a batch of coffee over the fire while guests watch.',
+    title: 'a roasting demonstration',
+  },
+  {
+    id: 'tasting',
+    label: 'Wanted to taste the coffee',
+    kind: 'want',
+    anchors: [
+      'We wish we could taste the coffee at the end',
+      'I would like to drink a cup of the coffee after the tour',
+      'Please add a coffee tasting',
+    ],
+    caps: ['grind-brew'],
+    need: 'Brewing coffee for guests to taste',
+    step: 'Finish with a tasting: brew your coffee and let guests try it.',
+    title: 'a coffee tasting',
+  },
+  {
+    id: 'buy',
+    label: 'Wanted to buy coffee to take home',
+    kind: 'want',
+    anchors: ['We wanted to buy coffee to take home', 'I wish I could buy roasted coffee beans'],
+    caps: ['beans-to-sell'],
+    need: 'Roasted coffee for guests to buy',
+    step: 'Offer bags of your roasted coffee for guests to buy.',
+    title: 'coffee to take home',
+  },
+  {
+    id: 'picking',
+    label: 'Enjoyed picking coffee cherries',
+    kind: 'want',
+    anchors: ['Picking ripe coffee cherries', 'The children enjoyed picking coffee cherries'],
+    caps: ['coffee-picking'],
+    need: 'Coffee cherries guests can pick',
+    step: 'Let guests pick ripe coffee cherries (in season).',
+    title: 'cherry picking',
+  },
+  {
+    id: 'food',
+    label: 'Enjoyed the food',
+    kind: 'want',
+    anchors: ['The home cooked lunch was delicious', 'The food was very tasty'],
+    caps: ['rice-curry', 'outdoor-kitchen'],
+    need: 'Cooking a meal for guests',
+    step: 'Serve a home-cooked lunch.',
+    title: 'a home-cooked lunch',
+  },
+  {
+    id: 'spices',
+    label: 'Interested in the spices',
+    kind: 'want',
+    anchors: ['Learning about spices like cinnamon and pepper', 'I wanted to learn more about the spice plants'],
+    caps: ['spice-plants'],
+    need: 'Spice plants such as cinnamon and pepper',
+    step: 'Show guests the spice plants and how they are used.',
+    title: 'a spice garden walk',
+  },
+  {
+    id: 'steep',
+    label: 'Found the walk too steep',
+    kind: 'issue',
+    anchors: ['The path is very steep', 'The walk was hard and steep, difficult for older people', 'The hill path is steep and slippery'],
+    caps: ['transport'],
+    need: 'A vehicle to drive guests up the hill',
+    step: 'Offer a lift for the steep part of the walk.',
+    title: 'a lift up the hill',
+  },
+  {
+    id: 'directions',
+    label: 'Had trouble finding the farm',
+    kind: 'issue',
+    anchors: ['The farm was hard to find', 'Please put up a sign on the road'],
+    caps: ['station-pickup', 'transport'],
+    need: 'Picking guests up and bringing them to the farm',
+    step: 'Pick guests up so they do not have to find the farm.',
+    title: 'pick-up',
+  },
+  {
+    id: 'rain',
+    label: 'Rain during the visit',
+    kind: 'issue',
+    anchors: ['It rained during the tour', 'They gave us umbrellas when it rained'],
+    caps: ['rain-shelter'],
+    need: 'A covered place to shelter from rain',
+    step: 'Keep the covered space ready in case of rain.',
+    title: 'a rain shelter',
+  },
+  {
+    id: 'payment',
+    label: 'Wanted to pay by card',
+    kind: 'issue',
+    anchors: ['Please accept card payment', 'We needed cash'],
+    caps: [],
+    need: 'Taking card payments',
+    step: 'Accept card payments.',
+    title: 'card payment',
+  },
+  {
+    id: 'leeches',
+    label: 'Leeches on the walk',
+    kind: 'issue',
+    anchors: ['There were leeches on the walk'],
+    caps: [],
+    need: 'Leech socks or salt for guests',
+    step: 'Give guests leech socks or salt before the walk.',
+    title: 'leech protection',
+  },
+  {
+    id: 'welcome',
+    label: 'Felt welcome',
+    kind: 'strength',
+    anchors: ['A warm welcome from a very friendly family', 'Kind and welcoming hosts'],
+  },
+  {
+    id: 'nature',
+    label: 'Liked the views and nature',
+    kind: 'strength',
+    anchors: ['Beautiful views of the mountains', 'Peaceful nature with birds and animals'],
+  },
+];
+
+</script>
+  <script>
+// Screen 3: themes from guest feedback, and three package options ranked by cost.
+//
+// How it works:
+// 1. Each review is embedded and compared with the example sentences of every
+//    theme in themes.js. It joins the closest theme if similar enough.
+// 2. Reviews that fit no known theme are clustered among themselves by
+//    similarity. These clusters have no name, so they are shown but never used
+//    to build a package.
+// 3. Themes with at least MIN_SUPPORT reviews are matched to capabilities
+//    marked Yes or With effort, using the fixed links in themes.js. Her own
+//    added items match only if very close to what the theme needs.
+// 4. Three options are assembled from the fixed step text of each matched
+//    theme: no cost (Yes items only), low cost (exactly one With effort item),
+//    higher investment (two or more). A tier that cannot be built says so.
+//    No text is generated.
+//
+// Example reviews are counted like any other, but every count that includes
+// them says how many are examples.
+const Analysis = (() => {
+  const MIN_SUPPORT = 3;
+  const NEAR_MISS = 2; // themes up to this many reviews short are named as "closest"
+  const THEME_MATCH = 0.45; // review vs theme example sentence (below this it fits no theme)
+  const CLUSTER_JOIN = 0.6; // unmatched review vs unmatched review
+  const CUSTOM_CAP_MATCH = 0.8; // her own item vs what a theme needs
+  const MAX_STEPS = 3;
+  const TEST_VISITORS = 10;
+  const TEST_KEEP = 3; // Fixed rule: keep the package if at least 3 of the next 10 take it.
+  const STATUS_LABELS = { yes: 'Yes', effort: 'With effort', no: 'No' };
+  const statusLabel = (s) => STATUS_LABELS[s] || 'not answered';
+
+  const ACCEPTED_KEY = 'package.v1';
+
+  let els = {};
+  let running = false;
+  let groups = null; // last analysis result
+  let totalCount = 0;
+  let readableCount = 0;
+  let tooShort = []; // real reviews too vague to use for themes ("Amazing!")
+  // Message shown above the options, e.g. after "I cannot". `undo` holds the
+  // change that can be reversed: { id, name, prev }.
+  let notice = null;
+
+  // ---------- Step 1: themes ----------
+
+  async function analyse() {
+    const reviews = Feedback.getItems();
+    const countable = reviews.filter((r) => !Feedback.unreadableScript(r.text));
+    tooShort = countable.filter((r) => Vague.isVague(r.text));
+    const readable = countable.filter((r) => !Vague.isVague(r.text));
+    totalCount = reviews.length;
+    readableCount = readable.length;
+
+    // Theme sentences first, quietly; then her reviews, with a count she can follow.
+    const anchorTexts = THEMES.flatMap((t) => t.anchors);
+    const needTexts = THEMES.filter((t) => t.need).map((t) => t.need);
+    const customCaps = Profile.getItems().filter((c) => c.custom).map((c) => c.name);
+    await AI.embed([...anchorTexts, ...needTexts, ...customCaps], showSetupProgress);
+    const reviewTexts = readable.map((r) => r.text);
+    const reviewVecs = await AI.embed(reviewTexts, showProgress);
+
+    const anchorVecs = new Map();
+    for (const t of THEMES) anchorVecs.set(t.id, await AI.embed(t.anchors));
+
+    const byTheme = new Map(THEMES.map((t) => [t.id, []]));
+    const leftover = [];
+    readable.forEach((r, i) => {
+      let best = null;
+      let bestScore = -1;
+      for (const t of THEMES) {
+        for (const a of anchorVecs.get(t.id)) {
+          const s = AI.similarity(reviewVecs[i], a);
+          if (s > bestScore) {
+            bestScore = s;
+            best = t;
+          }
+        }
+      }
+      if (bestScore >= THEME_MATCH) byTheme.get(best.id).push(r);
+      else leftover.push({ review: r, vec: reviewVecs[i] });
+    });
+
+    const result = [];
+    for (const t of THEMES) {
+      const rs = byTheme.get(t.id);
+      if (rs.length) result.push({ theme: t, reviews: rs });
+    }
+    for (const cluster of clusterLeftovers(leftover)) {
+      result.push({ theme: null, reviews: cluster });
+    }
+    // Most supported first; ties keep catalogue order.
+    result.sort((a, b) => b.reviews.length - a.reviews.length);
+    return result;
+  }
+
+  // Average-linkage clustering: repeatedly merge the two closest clusters
+  // while their average similarity is at least CLUSTER_JOIN.
+  function clusterLeftovers(items) {
+    let clusters = items.map((it) => [it]);
+    const avg = (a, b) => {
+      let s = 0;
+      for (const x of a) for (const y of b) s += AI.similarity(x.vec, y.vec);
+      return s / (a.length * b.length);
+    };
+    for (;;) {
+      let bi = -1;
+      let bj = -1;
+      let best = CLUSTER_JOIN;
+      for (let i = 0; i < clusters.length; i++) {
+        for (let j = i + 1; j < clusters.length; j++) {
+          const s = avg(clusters[i], clusters[j]);
+          if (s >= best) {
+            best = s;
+            bi = i;
+            bj = j;
+          }
+        }
+      }
+      if (bi < 0) break;
+      clusters[bi] = clusters[bi].concat(clusters[bj]);
+      clusters.splice(bj, 1);
+    }
+    return clusters.map((c) => c.map((it) => it.review));
+  }
+
+  // ---------- Step 2: three options, ranked by cost ----------
+
+  // Every word of a tier's wording is fixed here. Cost is stated as effort,
+  // never as money.
+  const TIERS = [
+    { id: 'none', title: 'Option 1 · No cost', cost: 'Cost: uses what you already have.' },
+    { id: 'low', title: 'Option 2 · Low cost', cost: 'Cost: needs something you can arrange.' },
+    { id: 'high', title: 'Option 3 · Higher investment', cost: 'Cost: needs an investment.' },
+  ];
+
+  // What a tier that cannot be built would need, naming specific farm items
+  // or themes that are short of reviews. Never returns an empty list.
+  function tierNeeds(tier, ctx) {
+    const { caps, effortSteps, missing, distinctEffortCaps } = ctx;
+    const linkedOf = (theme) => theme.caps.map((id) => caps.find((c) => c.id === id)).filter(Boolean);
+    const capRef = (c) => `“${c.name}” (now ${statusLabel(c.status)})`;
+    const orList = (xs) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} or ${xs[xs.length - 1]}` : xs[0]);
+    const about = (s) => `“${s.theme.label}” (${reviewCount(s.reviews)})`;
+    const short = groups
+      .filter((g) => g.theme && g.theme.kind !== 'strength' && g.reviews.length < MIN_SUPPORT)
+      .map((g) => ({ theme: g.theme, reviews: g.reviews, more: MIN_SUPPORT - g.reviews.length, linked: linkedOf(g.theme) }));
+    const shortLine = (s, mark) => {
+      const head = `${about(s)} needs ${plural(s.more, 'more review', 'more reviews')}`;
+      const have = s.linked.find((c) => c.status === mark);
+      if (have) return `${head}. You already have “${have.name}” (${statusLabel(mark)}).`;
+      if (s.linked.length) return `${head}, and ${orList(s.linked.map(capRef))} marked ${statusLabel(mark)}.`;
+      return `${head}, and something on your farm list that covers it (${s.theme.need.toLowerCase()}).`;
+    };
+    const markLine = (s, mark) => {
+      const linked = linkedOf(s.theme).filter((c) => c.status !== 'yes' && c.status !== mark);
+      if (linked.length) return `Mark ${orList(linked.map(capRef))} as ${statusLabel(mark)}, for ${about(s)}.`;
+      return `Add something to your farm list for ${about(s)} and mark it ${statusLabel(mark)}. It needs: ${s.theme.need.toLowerCase()}.`;
+    };
+    const needs = [];
+
+    if (tier.id === 'none') {
+      for (const s of effortSteps.concat(missing).slice(0, 2)) needs.push(markLine(s, 'yes'));
+      if (!needs.length) for (const s of short.slice(0, 2)) needs.push(shortLine(s, 'yes'));
+    } else if (tier.id === 'low') {
+      for (const s of missing.slice(0, 2)) needs.push(markLine(s, 'effort'));
+      if (!needs.length) {
+        for (const s of short.filter((x) => !x.linked.some((c) => c.status === 'yes')).slice(0, 2)) {
+          needs.push(shortLine(s, 'effort'));
+        }
+      }
+      if (!needs.length) {
+        needs.push('Everything guests asked for often enough is already covered by things marked Yes (see Option 1). ' +
+          'A low-cost option needs another thing guests ask for that you could do with effort.');
+      }
+    } else {
+      const used = [...new Map(effortSteps.map((s) => [s.cap.id, s.cap])).values()];
+      needs.push(`Two different things marked With effort that guests asked for. You have ${used.length}` +
+        `${used.length ? `: ${used.map((c) => `“${c.name}”`).join(', ')}` : ''}.`);
+      const usedIds = new Set(used.map((c) => c.id));
+      const extra = missing.filter((s) => !linkedOf(s.theme).some((c) => usedIds.has(c.id)));
+      for (const s of extra.slice(0, 2 - distinctEffortCaps)) needs.push(markLine(s, 'effort'));
+      if (needs.length === 1) {
+        const candidates = short.filter((x) => !x.linked.some((c) => c.status === 'yes' || usedIds.has(c.id)));
+        for (const s of candidates.slice(0, 2)) needs.push(shortLine(s, 'effort'));
+      }
+    }
+
+    if (!needs.length || (tier.id === 'high' && needs.length === 1)) {
+      needs.push(`More guest feedback: at least ${MIN_SUPPORT} guests need to mention the same thing. Add what guests say on the Feedback screen.`);
+    }
+    return needs;
+  }
+
+  // For one theme: the capability to use when only Yes counts, and the one to
+  // use when a With effort item is allowed.
+  async function capabilityOptions(theme, caps) {
+    const linked = theme.caps.map((id) => caps.find((c) => c.id === id)).filter(Boolean);
+    let yes = linked.find((c) => c.status === 'yes') || null;
+    let effort = linked.find((c) => c.status === 'effort') || null;
+    if (!yes || !effort) {
+      const custom = await closestCustom(theme, caps, (c) => c.status === 'yes' || c.status === 'effort');
+      if (custom?.status === 'yes') yes ??= custom;
+      if (custom?.status === 'effort') effort ??= custom;
+    }
+    // Unanswered means unknown, not No: never used to build, but remembered so
+    // she can be asked about it.
+    const unknown =
+      linked.find((c) => !c.status) || (await closestCustom(theme, caps, (c) => !c.status));
+    return { yes, effort, unknown };
+  }
+
+  async function closestCustom(theme, caps, include) {
+    const custom = caps.filter((c) => c.custom && include(c));
+    if (!custom.length) return null;
+    const [needVec] = await AI.embed([theme.need]);
+    const customVecs = await AI.embed(custom.map((c) => c.name));
+    let best = null;
+    let bestScore = CUSTOM_CAP_MATCH;
+    custom.forEach((c, i) => {
+      const s = AI.similarity(needVec, customVecs[i]);
+      if (s >= bestScore) {
+        bestScore = s;
+        best = c;
+      }
+    });
+    return best;
+  }
+
+  async function propose() {
+    const caps = Profile.getItems();
+    const supported = groups.filter((g) => g.theme && g.reviews.length >= MIN_SUPPORT);
+    const buildable = supported.filter((g) => g.theme.kind !== 'strength');
+
+    // Steps she can do with a Yes item, and steps that need a With effort item
+    // (only for themes no Yes item covers). Both lists are best supported first.
+    const yesSteps = [];
+    const effortSteps = [];
+    const missing = [];
+    for (const g of buildable) {
+      const { yes, effort, unknown } = await capabilityOptions(g.theme, caps);
+      const base = { theme: g.theme, reviews: g.reviews, unknown };
+      if (yes) yesSteps.push({ ...base, cap: yes });
+      else if (effort) effortSteps.push({ ...base, cap: effort });
+      else missing.push({ ...base, linked: g.theme.caps.map((id) => caps.find((c) => c.id === id)).filter(Boolean) });
+    }
+
+    // Themes a review or two short of MIN_SUPPORT that her farm could already
+    // deliver: named when nothing can be built, so she knows what to collect.
+    const near = [];
+    for (const g of groups) {
+      const short = MIN_SUPPORT - g.reviews.length;
+      if (!g.theme || g.theme.kind === 'strength' || short < 1 || short > NEAR_MISS) continue;
+      const { yes, effort } = await capabilityOptions(g.theme, caps);
+      if (yes || effort) near.push({ theme: g.theme, reviews: g.reviews, cap: yes || effort, short });
+    }
+
+    const distinctEffortCaps = new Set(effortSteps.map((s) => s.cap.id)).size;
+    const options = TIERS.map((tier) => {
+      let effortChosen;
+      if (tier.id === 'none') effortChosen = [];
+      else if (tier.id === 'low') effortChosen = effortSteps.slice(0, 1);
+      else effortChosen = effortSteps.slice(0, MAX_STEPS);
+
+      const effortUsed = new Set(effortChosen.map((s) => s.cap.id)).size;
+      const ok =
+        (tier.id === 'none' && yesSteps.length > 0) ||
+        (tier.id === 'low' && effortUsed === 1) ||
+        (tier.id === 'high' && effortUsed >= 2);
+      if (!ok) {
+        const ask = unansweredBlockers(tier, effortSteps, missing, distinctEffortCaps);
+        const needs = tierNeeds(tier, { caps, effortSteps, missing, distinctEffortCaps });
+        return { tier, ok: false, needs, ask };
+      }
+
+      const chosen = effortChosen.concat(yesSteps.slice(0, MAX_STEPS - effortChosen.length));
+      return makeOption(tier, chosen);
+    });
+
+    return { supported, buildable, missing, near, options, anyOk: options.some((o) => o.ok) };
+  }
+
+  // Unanswered items that are all that stand between a tier and being built.
+  // Each entry: { cap, theme, reviews, answer } where `answer` is the status
+  // that would build the tier ('yes' for no cost, 'effort' otherwise).
+  function unansweredBlockers(tier, effortSteps, missing, distinctEffortCaps) {
+    const asks = [];
+    const seen = new Set();
+    const add = (s, answer) => {
+      if (!s.unknown || seen.has(s.unknown.id)) return;
+      seen.add(s.unknown.id);
+      asks.push({ cap: s.unknown, theme: s.theme, reviews: s.reviews, answer });
+    };
+    if (tier.id === 'none') {
+      // A Yes for any of these themes would build Option 1.
+      for (const s of effortSteps.concat(missing)) add(s, 'yes');
+    } else if (tier.id === 'low') {
+      for (const s of missing) add(s, 'effort');
+    } else {
+      const effortIds = new Set(effortSteps.map((s) => s.cap.id));
+      for (const s of missing) if (s.unknown && !effortIds.has(s.unknown.id)) add(s, 'effort');
+      // Only ask if answering them could actually reach two With effort items.
+      if (distinctEffortCaps + asks.length < 2) return [];
+      return asks.slice(0, 2 - distinctEffortCaps);
+    }
+    return asks.slice(0, MAX_STEPS);
+  }
+
+  function makeOption(tier, steps) {
+    // Put in visit order (the order of THEMES).
+    steps.sort((a, b) => THEMES.indexOf(a.theme) - THEMES.indexOf(b.theme));
+    const caps = [];
+    for (const s of steps) if (!caps.includes(s.cap)) caps.push(s.cap);
+    return {
+      tier,
+      ok: true,
+      name: `Coffee farm visit with ${joinWords(steps.map((s) => s.theme.title))}`,
+      steps,
+      reviews: steps.flatMap((s) => s.reviews),
+      caps,
+    };
+  }
+
+  function joinWords(words) {
+    if (words.length < 2) return words.join('');
+    return `${words.slice(0, -1).join(', ')} and ${words[words.length - 1]}`;
+  }
+
+  // ---------- Rendering ----------
+
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function plural(n, one, many) {
+    return `${n} ${n === 1 ? one : many}`;
+  }
+
+  // ", 6 of them examples" / ", all examples" / "" for a set of reviews.
+  function exampleNote(reviews) {
+    const n = reviews.length;
+    const e = reviews.filter((r) => r.source === 'example').length;
+    if (!e) return '';
+    if (e === n) return n === 1 ? ', an example' : ', all examples';
+    return `, ${e} of them ${e === 1 ? 'an example' : 'examples'}`;
+  }
+
+  // "9 reviews, 6 of them examples"
+  function reviewCount(reviews) {
+    return plural(reviews.length, 'review', 'reviews') + exampleNote(reviews);
+  }
+
+  function showSetupProgress(m) {
+    if (m.type === 'download') showProgress(m);
+    else if (m.type === 'ready') {
+      els.progressText.textContent = 'Getting ready…';
+      els.progressBar.removeAttribute('value');
+    }
+  }
+
+  function showProgress(m) {
+    els.progress.hidden = false;
+    if (m.type === 'download') {
+      const mb = (b) => Math.round(b / 1e6);
+      els.progressText.textContent = `Downloading the AI model: ${mb(m.loaded)} of ${mb(m.total)} MB. This happens only once.`;
+      els.progressBar.value = m.total ? (m.loaded / m.total) * 100 : 0;
+    } else if (m.type === 'ready') {
+      els.progressText.textContent = 'Reading your reviews…';
+      els.progressBar.removeAttribute('value');
+    } else if (m.type === 'embedded') {
+      els.progressText.textContent = `Reading your reviews: ${m.done} of ${m.total}`;
+      els.progressBar.value = (m.done / m.total) * 100;
+    }
+  }
+
+  function renderThemes() {
+    const frag = document.createDocumentFragment();
+    const tooSmallLeftovers = [];
+
+    for (const g of groups) {
+      if (!g.theme && g.reviews.length < MIN_SUPPORT) {
+        tooSmallLeftovers.push(...g.reviews);
+        continue;
+      }
+      frag.appendChild(renderTheme(g.theme ? g.theme.label : 'Similar comments, no name yet', g.reviews, g.theme));
+    }
+    if (tooShort.length) {
+      const d = renderTheme('Too short to use for themes', tooShort, null, true);
+      d.querySelector('.theme-count').textContent = `${reviewCount(tooShort)} · kept, but not used`;
+      frag.appendChild(d);
+    }
+    if (tooSmallLeftovers.length) {
+      frag.appendChild(renderTheme('Comments that fit no theme', tooSmallLeftovers, null, true));
+    }
+    if (!groups.length) frag.appendChild(el('p', 'muted', 'No feedback to group yet.'));
+    els.themes.replaceChildren(frag);
+  }
+
+  function renderTheme(label, reviews, theme, forceSmall = false) {
+    const enough = !forceSmall && reviews.length >= MIN_SUPPORT;
+    const d = el('details', `theme${enough ? '' : ' theme-small'}`);
+    const s = el('summary');
+    s.appendChild(el('span', 'theme-label', label));
+    let countText;
+    if (!enough) countText = `Not enough feedback yet (${reviewCount(reviews)})`;
+    else if (!theme) countText = `${reviewCount(reviews)} · cannot be used, no name`;
+    else if (theme.kind === 'strength') countText = `${reviewCount(reviews)} · guests like this`;
+    else countText = reviewCount(reviews);
+    s.appendChild(el('span', 'theme-count', countText));
+    d.append(s, renderReviewList(reviews));
+    return d;
+  }
+
+  function renderReviewList(reviews) {
+    const ul = el('ul', 'theme-reviews');
+    for (const r of reviews) {
+      const li = el('li', null, r.text);
+      const lang = Language.guess(r.text);
+      if (lang) li.appendChild(el('span', 'tag tag-lang inline-tag', lang === 'Not in English' ? lang : `Appears to be ${lang}`));
+      if (r.source === 'example') li.appendChild(el('span', 'tag tag-example inline-tag', 'Example'));
+      ul.appendChild(li);
+    }
+    return ul;
+  }
+
+  function loadAccepted() {
+    return Store.load(ACCEPTED_KEY);
+  }
+
+  function isAccepted(option) {
+    const a = loadAccepted();
+    return a && a.tier === option.tier.id && a.name === option.name && a.capIds?.join() === option.caps.map((c) => c.id).join();
+  }
+
+  function renderNotice() {
+    const p = el('p', 'pkg-notice', notice.text);
+    if (notice.undo) {
+      const undo = el('button', 'btn btn-secondary btn-undo', 'Undo');
+      undo.type = 'button';
+      undo.addEventListener('click', onUndo);
+      p.append(' ', undo);
+    }
+    return p;
+  }
+
+  function renderPackage(result) {
+    const frag = document.createDocumentFragment();
+    if (notice) frag.appendChild(renderNotice());
+
+    if (!result.anyOk) {
+      frag.appendChild(renderNoPackage(result));
+      els.pkg.replaceChildren(frag);
+      return;
+    }
+
+    frag.appendChild(el('p', 'muted small', 'Three options, cheapest first. Each one is built only from what guests said and what your farm can do.'));
+    markBuildsOn(result.options);
+    for (const option of result.options) frag.appendChild(renderOption(option));
+
+    // Themes blocked only by unanswered items are asked about on the tier cards.
+    const notCovered = result.missing.filter((m) => !m.unknown);
+    if (notCovered.length) {
+      frag.appendChild(el('p', 'pkg-also',
+        `Guests also asked about: ${notCovered.map((m) => `${m.theme.label} (${reviewCount(m.reviews)})`).join('; ')}. ` +
+        'Nothing marked Yes or With effort on your farm covers this yet.'));
+    }
+    els.pkg.replaceChildren(frag);
+  }
+
+  // Questions about unanswered farm items that are blocking an option.
+  function renderAsks(asks, lead) {
+    const wrap = el('div', 'pkg-ask');
+    wrap.appendChild(el('p', 'pkg-ask-lead', lead));
+    for (const a of asks) {
+      const item = el('div', 'pkg-ask-item');
+      const q = el('p', 'pkg-ask-name', `Can you offer “${a.cap.name}”?`);
+      q.id = `ask-${a.cap.id}-${Math.random().toString(36).slice(2, 7)}`;
+      item.appendChild(q);
+      item.appendChild(el('p', 'pkg-trace', `Guests asked for this: “${a.theme.label}” (${reviewCount(a.reviews)}).`));
+      const choice = el('div', 'choice');
+      choice.setAttribute('role', 'group');
+      choice.setAttribute('aria-labelledby', q.id);
+      for (const status of ['yes', 'effort', 'no']) {
+        const b = el('button', null, STATUS_LABELS[status]);
+        b.type = 'button';
+        b.dataset.status = status;
+        b.setAttribute('aria-pressed', 'false');
+        b.addEventListener('click', () => onAnswer(a.cap, status));
+        choice.appendChild(b);
+      }
+      item.appendChild(choice);
+      wrap.appendChild(item);
+    }
+    return wrap;
+  }
+
+  function tierAskLead(option) {
+    const n = option.ask.length;
+    const them = n === 1 ? 'it' : 'them';
+    const mark = option.tier.id === 'none' ? 'Yes' : 'With effort';
+    return `You have not answered ${n === 1 ? 'this item' : 'these items'} on your farm list yet. ` +
+      `If you can mark ${them} ${mark}, this option can be built.`;
+  }
+
+  function renderNoPackage(result) {
+    const box = el('div', 'pkg pkg-none');
+    box.appendChild(el('p', 'pkg-kicker', 'No package yet'));
+    box.appendChild(el('h2', null, 'A package cannot be built from what you have now.'));
+    const ul = el('ul', 'pkg-missing');
+    for (const reason of whyNoPackage(result)) ul.appendChild(el('li', null, reason));
+    box.appendChild(ul);
+
+    // Unanswered items that could unlock an option: ask about each one once.
+    const asks = [];
+    for (const o of result.options) {
+      for (const a of o.ask || []) if (!asks.some((x) => x.cap.id === a.cap.id)) asks.push(a);
+    }
+    if (asks.length) {
+      box.appendChild(el('p', 'pkg-subhead', asks.length === 1 ? 'A question for you' : 'Questions for you'));
+      box.appendChild(renderAsks(asks, 'You have not answered these on your farm list yet. Your answer may give you an option.'));
+    }
+
+    // Something she can act on is always shown.
+    if (totalCount && result.near.length) {
+      box.appendChild(el('p', 'pkg-subhead', 'Closest to an option'));
+      const nl = el('ul', 'pkg-missing');
+      for (const n of result.near) {
+        nl.appendChild(el('li', null,
+          `“${n.theme.label}”: ${reviewCount(n.reviews)}. You have “${n.cap.name}” (${STATUS_LABELS[n.cap.status]}). ` +
+          `${plural(n.short, 'more review', 'more reviews')} about this would give you an option.`));
+      }
+      box.appendChild(nl);
+    }
+    if (totalCount) {
+      box.appendChild(el('p', 'pkg-next',
+        'What to do next: ask your next guests what they liked and what they missed, and add what they say on the Feedback screen.'));
+    }
+    return box;
+  }
+
+  // "Hand roaster (pan or drum over fire), marked Yes"
+  function capUse(c) {
+    return `${c.name}, marked ${STATUS_LABELS[c.status]}`;
+  }
+
+  // When an option contains every step of a cheaper one, say so, so she does
+  // not read the same steps twice without knowing why.
+  function markBuildsOn(options) {
+    options.forEach((o, i) => {
+      if (!o.ok) return;
+      for (let j = i - 1; j >= 0; j--) {
+        const base = options[j];
+        if (!base.ok) continue;
+        const has = new Set(o.steps.map((s) => s.theme.id));
+        if (base.steps.every((s) => has.has(s.theme.id))) {
+          const baseIds = new Set(base.steps.map((s) => s.theme.id));
+          const added = o.steps.filter((s) => !baseIds.has(s.theme.id)).map((s) => s.theme.title);
+          o.buildsOn = `Builds on ${base.tier.title.split(' · ')[0]}, adding ${joinWords(added)}.`;
+        }
+        return;
+      }
+    });
+  }
+
+  function renderOption(option) {
+    const box = el('div', 'pkg');
+    box.appendChild(el('p', 'pkg-kicker', option.tier.title));
+
+    if (!option.ok) {
+      box.classList.add('pkg-none');
+      if (option.ask.length) {
+        box.appendChild(el('p', 'pkg-cannot',
+          option.ask.length === 1 ? 'Not built yet: one answer is missing.' : `Not built yet: ${option.ask.length} answers are missing.`));
+        box.appendChild(renderAsks(option.ask, tierAskLead(option)));
+      } else {
+        box.appendChild(el('p', 'pkg-cannot', 'Cannot be built yet. It needs:'));
+        const ul = el('ul', 'pkg-needs');
+        for (const n of option.needs) ul.appendChild(el('li', null, n));
+        box.appendChild(ul);
+      }
+      return box;
+    }
+
+    box.appendChild(el('h2', null, option.name));
+    box.appendChild(el('p', 'pkg-cost', option.tier.cost));
+    if (option.buildsOn) box.appendChild(el('p', 'pkg-builds', option.buildsOn));
+
+    const ol = el('ol', 'pkg-steps');
+    for (const s of option.steps) {
+      const li = el('li');
+      li.appendChild(el('p', 'pkg-step', s.theme.step));
+      const trace = el('p', 'pkg-trace');
+      trace.append(
+        el('span', null, `Because: ${reviewCount(s.reviews)}, “${s.theme.label}”`),
+        el('br'),
+        el('span', null, `Uses: ${capUse(s.cap)}`),
+      );
+      li.appendChild(trace);
+      ol.appendChild(li);
+    }
+    box.appendChild(ol);
+
+    box.appendChild(el('p', 'pkg-evidence',
+      `Evidence: ${plural(option.reviews.length, 'review supports', 'reviews support')} this${exampleNote(option.reviews)}. ` +
+      `Uses: ${option.caps.map(capUse).join('; ')}.`));
+    box.appendChild(el('p', 'pkg-test',
+      `Test: offer it to your next ${TEST_VISITORS} visitors. Keep it if at least ${TEST_KEEP} of them say yes.`));
+
+    const accepted = isAccepted(option);
+    if (accepted) {
+      const when = new Date(loadAccepted().acceptedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+      box.appendChild(el('p', 'pkg-accepted', `You said you can do this (${when}). Now try it with your next ${TEST_VISITORS} visitors.`));
+    }
+
+    const actions = el('div', 'pkg-actions');
+    const yes = el('button', 'btn btn-primary', 'I can do this');
+    yes.type = 'button';
+    yes.hidden = accepted;
+    yes.addEventListener('click', () => onAccept(option));
+    const no = el('button', 'btn btn-secondary', 'I cannot');
+    no.type = 'button';
+    no.addEventListener('click', () => onCannot(option, box, actions));
+    actions.append(yes, no);
+    box.appendChild(actions);
+    return box;
+  }
+
+  function whyNoPackage(pkg) {
+    const reasons = [];
+    if (!totalCount) {
+      reasons.push('There is no guest feedback yet. Add some on the Feedback screen.');
+      return reasons;
+    }
+    if (!readableCount) {
+      if (tooShort.length) {
+        reasons.push(`${reviewCount(tooShort)} ${tooShort.length === 1 ? 'is' : 'are'} too short to use for themes, like “${tooShort[0].text}”. ` +
+          'Reviews that say what guests liked or missed are needed.');
+      }
+      if (totalCount > tooShort.length) {
+        reasons.push('Reviews in Sinhala or Tamil are not counted; see the Feedback screen.');
+      }
+      return reasons;
+    }
+    if (!pkg.supported.length) {
+      reasons.push(`No theme has ${MIN_SUPPORT} or more reviews yet.`);
+      const best = groups.find((g) => g.theme);
+      if (best && !pkg.near.length) reasons.push(`Closest so far: “${best.theme.label}” with ${reviewCount(best.reviews)}.`);
+      return reasons;
+    }
+    if (!pkg.buildable.length) {
+      reasons.push(`Guests mostly praised things you already do (${pkg.supported.map((g) => g.theme.label).join('; ')}). No request or problem has ${MIN_SUPPORT} or more reviews yet.`);
+      return reasons;
+    }
+    for (const m of pkg.missing) {
+      const head = `Guests: “${m.theme.label}” (${reviewCount(m.reviews)}).`;
+      if (m.unknown) {
+        reasons.push(`${head} You have not said yet whether you can offer “${m.unknown.name}”. See the question below.`);
+      } else if (m.linked.length) {
+        const states = m.linked.map((c) => `“${c.name}” (now ${c.status === 'no' ? 'No' : 'not answered'})`);
+        const joined = states.length > 1 ? `${states.slice(0, -1).join(', ')} or ${states[states.length - 1]}` : states[0];
+        reasons.push(`${head} Missing: ${joined}. It must be Yes or With effort on the My farm screen.`);
+      } else {
+        reasons.push(`${head} Nothing on your farm list covers this. It needs: ${m.theme.need.toLowerCase()}.`);
+      }
+    }
+    return reasons;
+  }
+
+  // ---------- Actions ----------
+
+  // Only one option is kept as accepted; choosing another replaces it.
+  async function onAccept(option) {
+    Store.save(ACCEPTED_KEY, {
+      tier: option.tier.id,
+      name: option.name,
+      steps: option.steps.map((s) => s.theme.step),
+      capIds: option.caps.map((c) => c.id),
+      reviewCount: option.reviews.length,
+      exampleCount: option.reviews.filter((r) => r.source === 'example').length,
+      acceptedAt: new Date().toISOString(),
+    });
+    notice = null;
+    renderPackage(await propose());
+  }
+
+  // Always asks which item, and tapping it is the confirmation.
+  function onCannot(option, box, actions) {
+    const ask = el('div', 'pkg-which');
+    ask.appendChild(el('p', null, option.caps.length > 1 ? 'Which one can you not do?' : 'Is this the one you cannot do?'));
+    ask.appendChild(el('p', 'pkg-which-hint', 'Tapping it marks it No on your farm list. You can undo this.'));
+    for (const c of option.caps) {
+      const b = el('button', 'btn btn-secondary btn-wide', c.name);
+      b.type = 'button';
+      b.addEventListener('click', () => markCannot(c));
+      ask.appendChild(b);
+    }
+    const cancel = el('button', 'btn btn-quiet', 'Cancel');
+    cancel.type = 'button';
+    cancel.addEventListener('click', () => {
+      ask.remove();
+      actions.hidden = false;
+    });
+    ask.appendChild(cancel);
+    actions.hidden = true;
+    box.appendChild(ask);
+    ask.scrollIntoView({ block: 'nearest' });
+  }
+
+  async function markCannot(cap) {
+    Profile.setStatus(cap.id, 'no');
+    notice = {
+      text: `Changed on your farm list: “${cap.name}” is now No (it was ${statusLabel(cap.status)}).`,
+      undo: { id: cap.id, name: cap.name, prev: cap.status },
+    };
+    renderPackage(await propose());
+    showNotice();
+  }
+
+  // Her answer to a question about an unanswered item.
+  async function onAnswer(cap, status) {
+    Profile.setStatus(cap.id, status);
+    notice = {
+      text: `Saved on your farm list: “${cap.name}” is now ${statusLabel(status)}.`,
+      undo: { id: cap.id, name: cap.name, prev: cap.status },
+    };
+    renderPackage(await propose());
+    showNotice();
+  }
+
+  async function onUndo() {
+    const { id, name, prev } = notice.undo;
+    Profile.setStatus(id, prev);
+    notice = { text: `Undone: “${name}” is back to ${statusLabel(prev)}.` };
+    renderPackage(await propose());
+    showNotice();
+  }
+
+  function showNotice() {
+    els.pkg.querySelector('.pkg-notice')?.scrollIntoView({ block: 'start' });
+  }
+
+  // ---------- Flow ----------
+
+  async function run() {
+    if (running) return;
+    running = true;
+    notice = null;
+    els.error.hidden = true;
+    els.start.hidden = true;
+    els.progress.hidden = false;
+    els.progressText.textContent = 'Starting the AI model…';
+    els.progressBar.removeAttribute('value');
+    try {
+      groups = await analyse();
+      renderThemes();
+      renderPackage(await propose());
+      els.result.hidden = false;
+      // Ask the browser not to clear the downloaded model when space is low.
+      navigator.storage?.persist?.().catch(() => {});
+    } catch (err) {
+      els.error.textContent = `Something went wrong: ${err.message}`;
+      els.error.hidden = false;
+      els.start.hidden = false;
+    } finally {
+      els.progress.hidden = true;
+      running = false;
+    }
+  }
+
+  async function onShow() {
+    if (running) return;
+    // Download only when she asks for it; after that, analyse straight away.
+    if (await AI.isModelCached()) {
+      run();
+    } else {
+      els.start.hidden = false;
+      els.result.hidden = true;
+    }
+  }
+
+  function init() {
+    els = {
+      start: document.getElementById('an-start'),
+      run: document.getElementById('an-run'),
+      offlineNote: document.getElementById('an-offline-note'),
+      progress: document.getElementById('an-progress'),
+      progressText: document.getElementById('an-progress-text'),
+      progressBar: document.getElementById('an-progress-bar'),
+      error: document.getElementById('an-error'),
+      result: document.getElementById('an-result'),
+      pkg: document.getElementById('an-package'),
+      themes: document.getElementById('an-themes'),
+      rerun: document.getElementById('an-rerun'),
+    };
+    els.run.addEventListener('click', run);
+    els.rerun.addEventListener('click', run);
+    // Without a secure context the browser cannot keep the model, so it would
+    // download again every time.
+    els.offlineNote.hidden = window.isSecureContext;
+  }
+
+  return { init, onShow };
+})();
+
+</script>
+  <script>
+// App shell: simple hash routing between the three screens.
+(() => {
+  const SCREENS = ['profile', 'feedback', 'package'];
+  const DEFAULT = 'profile';
+  const APP_NAME = 'VestaFuture';
+
+  const title = document.getElementById('screen-title');
+  const tabs = document.querySelectorAll('.tabbar a');
+
+  function show() {
+    const requested = location.hash.slice(1);
+    const current = SCREENS.includes(requested) ? requested : DEFAULT;
+
+    for (const name of SCREENS) {
+      const el = document.getElementById(`screen-${name}`);
+      el.hidden = name !== current;
+      if (name === current) {
+        title.textContent = el.dataset.title;
+        document.title = APP_NAME;
+      }
+    }
+    for (const tab of tabs) {
+      if (tab.dataset.screen === current) tab.setAttribute('aria-current', 'page');
+      else tab.removeAttribute('aria-current');
+    }
+    window.scrollTo(0, 0);
+    // Re-read feedback and farm answers each time, since either may have changed.
+    if (current === 'package') Analysis.onShow();
+  }
+
+  // Two-sentence welcome on the first screen until she taps "Got it".
+  const welcome = document.getElementById('welcome');
+  welcome.hidden = Store.load('welcome.dismissed') === true;
+  document.getElementById('welcome-ok').addEventListener('click', () => {
+    Store.save('welcome.dismissed', true);
+    welcome.hidden = true;
+  });
+
+  Profile.init();
+  Feedback.init();
+  Analysis.init();
+  window.addEventListener('hashchange', show);
+  show();
+
+  // Keeps the app and the AI library available offline. Needs a secure
+  // context (https, or http://localhost).
+  if ('serviceWorker' in navigator && window.isSecureContext) {
+    /* service worker not used in the single-file version */
+  }
+})();
+
+</script>
+</body>
+</html>

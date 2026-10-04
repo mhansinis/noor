@@ -2,6 +2,7 @@
 // Each item has a status: 'yes', 'effort' (possible with effort), 'no', or null (not answered yet).
 const Profile = (() => {
   const STORAGE_KEY = 'profile.v1';
+  const GOOD_USABLE = 10; // suggested number of Yes / With effort items
 
   const GROUPS = [
     'Coffee and the farm',
@@ -63,22 +64,65 @@ const Profile = (() => {
     const answered = items.filter((i) => i.status).length;
     els.progress.textContent = `${answered} of ${items.length} answered`;
 
+    // Encourage, never block: more Yes / With effort items give more options.
+    const usable = items.filter((i) => i.status === 'yes' || i.status === 'effort').length;
+    els.tip.textContent = usable >= GOOD_USABLE
+      ? `${usable} items marked Yes or With effort. That gives the app plenty to work with.`
+      : `You will get better results with at least ${GOOD_USABLE} items marked Yes or With effort. You have ${usable} so far.`;
+    els.tip.classList.toggle('tip-done', usable >= GOOD_USABLE);
+
     const frag = document.createDocumentFragment();
     for (const group of GROUPS) {
       const groupItems = items.filter((i) => i.group === group);
       if (!groupItems.length) continue;
+      const done = groupItems.filter((i) => i.status).length;
+      const complete = done === groupItems.length;
+      // A group starts folded only if everything in it is answered.
+      if (!openGroups.has(group)) openGroups.set(group, !complete);
 
-      const section = document.createElement('section');
-      section.className = 'group';
-      const h2 = document.createElement('h2');
-      h2.textContent = group;
+      const details = document.createElement('details');
+      details.className = `group${complete ? ' group-done' : ''}`;
+      details.dataset.group = group;
+      details.open = openGroups.get(group);
+      details.addEventListener('toggle', () => openGroups.set(group, details.open));
+
+      const summary = document.createElement('summary');
+      const name = document.createElement('span');
+      name.className = 'group-name';
+      name.textContent = group;
+      const count = document.createElement('span');
+      count.className = 'group-count';
+      count.textContent = complete ? '✓ All done' : `${done} of ${groupItems.length}`;
+      count.setAttribute('aria-label', complete ? 'all answered' : `${done} of ${groupItems.length} answered`);
+      summary.append(name, count);
+
       const ul = document.createElement('ul');
       ul.className = 'items';
       for (const item of groupItems) ul.appendChild(renderItem(item));
-      section.append(h2, ul);
-      frag.appendChild(section);
+      details.append(summary, ul);
+      frag.appendChild(details);
     }
     els.list.replaceChildren(frag);
+  }
+
+  // Which groups are open, kept across re-renders. Not saved: on the next
+  // visit, finished groups start folded again.
+  const openGroups = new Map();
+  const FOLD_DELAY_MS = 450; // long enough to see the answer land before folding
+
+  function isComplete(group) {
+    return items.filter((i) => i.group === group).every((i) => i.status);
+  }
+
+  // Fold a group she has just finished and bring the next unfinished one into view.
+  function foldFinished(group) {
+    setTimeout(() => {
+      if (!isComplete(group)) return; // she changed her mind in the meantime
+      openGroups.set(group, false);
+      render();
+      const next = [...els.list.querySelectorAll('details.group')].find((d) => !d.classList.contains('group-done'));
+      (next || els.list.querySelector(`details[data-group="${group}"]`))?.scrollIntoView({ block: 'start' });
+    }, FOLD_DELAY_MS);
   }
 
   function renderItem(item) {
@@ -131,7 +175,10 @@ const Profile = (() => {
       if (!confirm(`Remove "${item.name}"?`)) return;
       items = items.filter((i) => i !== item);
     } else if (btn.dataset.status) {
-      item.status = btn.dataset.status;
+      const wasComplete = isComplete(item.group);
+      // Tapping the answer that is already chosen clears it (back to unanswered).
+      item.status = item.status === btn.dataset.status ? null : btn.dataset.status;
+      if (!wasComplete && isComplete(item.group)) foldFinished(item.group);
     } else {
       return;
     }
@@ -152,6 +199,7 @@ const Profile = (() => {
     }
     const id = `custom-${Date.now().toString(36)}`;
     items.push({ id, name, group: CUSTOM_GROUP, status: null, custom: true });
+    openGroups.set(CUSTOM_GROUP, true); // so she can answer the new item straight away
     els.addInput.value = '';
     persist();
     render();
@@ -160,8 +208,9 @@ const Profile = (() => {
   }
 
   function onReset() {
-    if (!confirm('Clear all your answers and your own items, and start again with the examples?')) return;
+    if (!confirm('Clear all your answers and remove the items you added? The list goes back to how it started.')) return;
     items = seedItems();
+    openGroups.clear();
     persist();
     render();
     window.scrollTo(0, 0);
@@ -171,6 +220,7 @@ const Profile = (() => {
     els = {
       list: document.getElementById('cap-list'),
       progress: document.getElementById('progress'),
+      tip: document.getElementById('usable-tip'),
       saveError: document.getElementById('save-error'),
       addForm: document.getElementById('add-form'),
       addInput: document.getElementById('add-input'),

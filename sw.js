@@ -4,7 +4,7 @@
 // - Transformers.js library from the CDN: cached once, then served from cache.
 // - The model and its WASM runtime are cached by Transformers.js itself
 //   (in "transformers-cache"), so they are not cached here a second time.
-const APP_CACHE = 'farmvisits-app-v1';
+const APP_CACHE = 'farmvisits-app-v8';
 const LIB_CACHE = 'farmvisits-lib-v1';
 const LIB_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.0/dist/transformers.min.js';
 const NETWORK_TIMEOUT_MS = 3000;
@@ -17,6 +17,10 @@ const APP_FILES = [
   'js/ai.js',
   'js/embed-worker.js',
   'js/profile.js',
+  'js/privacy.js',
+  'js/paste-parser.js',
+  'js/vague.js',
+  'js/language.js',
   'js/example-reviews.js',
   'js/feedback.js',
   'js/themes.js',
